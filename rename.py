@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# ernitron (c) 2017
+# Mit License
 
 
 import os
