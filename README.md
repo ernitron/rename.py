@@ -8,12 +8,13 @@ Software: based on python 3
 
 # USAGE
 
-usage: rename.py [-h] [--root ROOT] [-s START] [-c CONTAINS] [-r REPLACE] [-x SUFFIX] [-k SKIP] [-p PATTERN] [-b SUB] [-n]
+    usage: rename.py [-h] [--root ROOT] [-s START] [-c CONTAINS] [-r REPLACE] [-x SUFFIX] [-k SKIP] [-p PATTERN] [-b SUB] [-n]
                  [-e] [-f] [-R] [-u] [-l] [-C] [-v]
 
 rename files
 
-optional arguments:
+    optional arguments:
+
   -h, --help            show this help message and exit
   --root ROOT
   -s START, --start START
@@ -38,6 +39,7 @@ optional arguments:
   -v, --verbose         verbose output
 
 Examples:
+
     rename.py --start start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
     would rename a file like: start_of_file1234_Take_This.mp3
                      into: 01-Take_That.mp3
