@@ -1,6 +1,8 @@
 # rename.py
 
-This is a rename.py application
+This is yet another rename.py application.
+
+My Own Rename (bulk file rename python command line application) ala Perl rename.pl
 
 # Requirements
 
@@ -15,30 +17,30 @@ rename files
 
     optional arguments:
 
-  -h, --help            show this help message and exit
-  --root ROOT
-  -s START, --start START
-                        replace start of filename
-  -c CONTAINS, --contains CONTAINS
+    -h, --help            show this help message and exit
+    --root ROOT
+    -s START, --start START
+        replace start of filename
+    -c CONTAINS, --contains CONTAINS
                         check if contains pattern
-  -r REPLACE, --replace REPLACE
+    -r REPLACE, --replace REPLACE
                         replace pattern of contains
-  -x SUFFIX, --suffix SUFFIX
+    -x SUFFIX, --suffix SUFFIX
                         it must have suffix like .mp3
-  -k SKIP, --skip SKIP  skip this number of char from file
-  -p PATTERN, --pattern PATTERN
+    -k SKIP, --skip SKIP  skip this number of char from file
+    -p PATTERN, --pattern PATTERN
                         pattern
-  -b SUB, --sub SUB     substitution
-  -n, --number          add a 2 digit sequence start of filename
-  -e, --endnum          add a 2 digit sequence end of filename
-  -f, --force           force to rename otherwise it just print
-  -R, --recursive       Recursive
-  -u, --upper           To upper
-  -l, --lower           To lower
-  -C, --camel           CamelCase
-  -v, --verbose         verbose output
+    -b SUB, --sub SUB     substitution
+    -n, --number          add a 2 digit sequence start of filename
+    -e, --endnum          add a 2 digit sequence end of filename
+    -f, --force           force to rename otherwise it just print
+    -R, --recursive       Recursive
+    -u, --upper           To upper
+    -l, --lower           To lower
+    -C, --camel           CamelCase
+    -v, --verbose         verbose output
 
-Examples:
+# Examples
 
     rename.py --start start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
     would rename a file like: start_of_file1234_Take_This.mp3
@@ -54,8 +56,7 @@ Examples:
 ## Configuration
 
 ## Development
-
 There is plenty of space for development
 
-
+## License MIT
 

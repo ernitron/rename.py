@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 
+
 import os
 import sys
 import re
+
+# To print colored text on term
+RED   = '\033[1;31m'
+BLUE  = '\033[1;34m'
+CYAN  = '\033[1;36m'
+GREEN = '\033[0;32m'
+RESET = '\033[0;0m'
+BOLD  = '\033[;1m'
+REV   = '\033[;7m'
 
 def camel_case(fname):
     '''Convert to camel case: returns newname'''
@@ -97,13 +107,6 @@ def renaming(start=None, skip=None, contains=None, replace=None, number=False, e
 
         do_rename(filename, newname, force)
 
-RED   = '\033[1;31m'
-BLUE  = '\033[1;34m'
-CYAN  = '\033[1;36m'
-GREEN = '\033[0;32m'
-RESET = '\033[0;0m'
-BOLD  = '\033[;1m'
-REV   = '\033[;7m'
 
 def do_rename(oldname, newname, force):
     if oldname == newname or not newname :
