@@ -22,14 +22,17 @@ check:
 run: check
 	python $(APPLICATION)
 
+install: check
+	sudo install $(APPLICATION) $(INSTALLDIR)
+
 clean:
 	rm -f *.pyc
 
 ssh: check		
-	for s in localhosy server zerver1 zerver2 zerver3 chip1 chip2; \
+	for s in localhost server zerver1 zerver2 zerver3 chip1 chip2; \
 	do \
 	   scp $(APPLICATION) root@$$s:/$(INSTALLDIR)/ ;\
-	   echo Doing something in $$s ;\
+	   echo installed in $$s ;\
 	done;
 
 rsync: check		
@@ -41,7 +44,6 @@ rsync: check
 
 revsync:
 	rsync -av -n --exclude '*.pid' --exclude '*.pyc'  root@$(SERVER):/$(INSTALLDIR)/$(APPLICATION) .
-
 
 git:
 	git commit -m 'update ${DATE}' -a
