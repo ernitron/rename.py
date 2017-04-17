@@ -151,7 +151,7 @@ if __name__ == '__main__':
                      into: 01-Take_That.mp3
 
  rename.py -s start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
- rename.py -s start_of_file -p This -b That -k 5 -n -x mp3 -f
+ rename.py -s start_of_file -p This -r That -k 5 -n -x mp3 -f
  would do the same
  '''
 
@@ -181,7 +181,7 @@ if __name__ == '__main__':
 
     # get args
     args = parser.parse_args()
-    if not any([args.start, args.space, args.contains, args.replace, args.skip, args.force, args.pattern, args.sub, args.lower, args.upper, args.camel, args.verbose]):
+    if not any([args.start, args.space, args.contains, args.replace, args.skip, args.force, args.pattern, args.lower, args.upper, args.camel, args.verbose]):
         print("Version ", Version)
         parser.print_help()
         print("Sorry but I have nothing to do, did you try with some flags?\n\n")
