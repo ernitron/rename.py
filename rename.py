@@ -82,25 +82,18 @@ def renaming(start=None, skip=None, contains=None, replace=None, number=False, e
 
         if start or skip:
             newname = skip_name(newname, start, skip)
-
         if contains and replace:
             newname = replace_content(newname, contains, replace)
-
         if camel:
             newname = camel_case(newname)
-
         if toupper:
             newname = upper_case(newname)
         if tolow:
-            newname = lower_case(newname)
-
-        if pattern :
+        if pattern:
             newname = substitute(newname, pattern, sub)
-
         if number:
             newname = add_number(newname, counter)
             counter += 1
-
         if endnum:
             newname = add_endnum(newname, counter)
             endcounter += 1
@@ -108,7 +101,6 @@ def renaming(start=None, skip=None, contains=None, replace=None, number=False, e
         newname = newname + extension
 
         do_rename(filename, newname, force)
-
 
 def do_rename(oldname, newname, force):
     if oldname == newname or not newname :

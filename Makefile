@@ -47,4 +47,5 @@ revsync:
 
 git:
 	git commit -m 'update ${DATE}' -a
+	git config --global credential.helper 'cache --timeout=7200'
 	git push
