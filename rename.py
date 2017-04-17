@@ -77,14 +77,12 @@ def add_endnum(fname, counter):
      return '%s-%02d' % (fname, counter)
 
 def substitute(fname, pattern, sub):
+    if not pattern: return fname
     try:
         spb = pattern.split('/')
         return re.sub(spb[1], spb[2], fname)
     except:
         pass
-
-    if not pattern: return fname
-    if not sub: sub = ''
     return re.sub(pattern, sub, fname)
 
 def renaming(a):
@@ -111,14 +109,14 @@ def renaming(a):
             newname = start_name(newname, a.start)
         if a.contains and a.replace:
             newname = replace_content(newname, a.contains, a.replace)
+        if a.pattern:
+            newname = substitute(newname, a.pattern, a.replace)
         if a.camel:
             newname = camel_case(newname)
         if a.upper:
             newname = upper_case(newname)
         if a.lower:
             newname = lower_case(newname)
-        if a.pattern:
-            newname = substitute(newname, a.pattern, a.sub)
         if a.space:
             newname = replace_space(newname)
         if a.number:
@@ -161,14 +159,13 @@ if __name__ == '__main__':
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('--root', default='./')
-    parser.add_argument('-b', '--sub', help='substitution', default=None)
-    parser.add_argument('-c', '--contains', help='check if contains pattern', default=None)
+    parser.add_argument('-c', '--contains', help='check for string in filename; works with -r', default=None)
+    parser.add_argument('-p', '--pattern', help='pattern with regex', default=None)
+    parser.add_argument('-r', '--replace', help='replace for match string; works with -c and -p', default=None)
     parser.add_argument('-k', '--skip', help='skip this number of char from file', default=None)
     parser.add_argument('-m', '--match', help='apply only to file that match pattern', default=None)
-    parser.add_argument('-p', '--pattern', help='pattern', default=None)
-    parser.add_argument('-r', '--replace', help='replace pattern of contains', default=None)
     parser.add_argument('-s', '--start', help='replace start of filename', default=None)
-    parser.add_argument('-x', '--suffix', help='it must have suffix like .mp3', default=None)
+    parser.add_argument('-x', '--suffix', help='apply only file with suffix like .mp3', default=None)
     # Bool
     parser.add_argument('-a', '--space', action='store_true', help='no space or replace space', default=False)
     parser.add_argument('-e', '--endnum', action='store_true', help='add a 2 digit sequence end of filename', default=False)
