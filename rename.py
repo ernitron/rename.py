@@ -41,7 +41,8 @@ def replace_space(fname, fill_char='_'):
 
 def replace_content(fname, contains=None, replace=None):
     if contains and contains in fname:
-        if replace is not None:
+        if not replace:
+            replace = ''
             return fname.replace(contains, replace)
     return fname
 
@@ -53,13 +54,19 @@ def upper_case(fname):
     '''Upper filename :returns newname '''
     return fname.upper()
 
-def skip_name(fname, start=None, skip=None):
+def skip_name(fname, skip=None):
     '''Skip in filename: returns: newname '''
+    startlen = 0
+    if skip and skip.isdigit():
+        startlen += int(skip)
+    # Initialize newname
+    return fname[startlen:]
+
+def start_name(fname, start=None):
+    '''Skip start in filename: returns: newname '''
     startlen = 0
     if start and fname.startswith(start):
         startlen += len(start)
-    if skip and skip.isdigit():
-        startlen += int(skip)
     # Initialize newname
     return fname[startlen:]
 
@@ -76,6 +83,7 @@ def substitute(fname, pattern, sub):
     except:
         pass
 
+    if not pattern: return fname
     if not sub: sub = ''
     return re.sub(pattern, sub, fname)
 
@@ -86,6 +94,10 @@ def renaming(a):
         newname, extension = os.path.splitext(filename)
         extension = extension.lower()
 
+        if a.match:
+            if not re.match(a.match, filename):
+                continue
+
         if a.suffix and not a.suffix in extension:
             continue
         if a.contains and not a.contains in filename:
@@ -93,8 +105,10 @@ def renaming(a):
         if a.verbose:
             print(CYAN, filename, RESET)
 
-        if a.start or a.skip:
-            newname = skip_name(newname, a.start, a.skip)
+        if a.skip:
+            newname = skip_name(newname, a.skip)
+        if a.start:
+            newname = start_name(newname, a.start)
         if a.contains and a.replace:
             newname = replace_content(newname, a.contains, a.replace)
         if a.camel:
@@ -150,6 +164,7 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--sub', help='substitution', default=None)
     parser.add_argument('-c', '--contains', help='check if contains pattern', default=None)
     parser.add_argument('-k', '--skip', help='skip this number of char from file', default=None)
+    parser.add_argument('-m', '--match', help='apply only to file that match pattern', default=None)
     parser.add_argument('-p', '--pattern', help='pattern', default=None)
     parser.add_argument('-r', '--replace', help='replace pattern of contains', default=None)
     parser.add_argument('-s', '--start', help='replace start of filename', default=None)
