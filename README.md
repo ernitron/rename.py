@@ -1,15 +1,12 @@
 # rename.py
 
 This is yet another rename.py application.
-
-My Own Rename (bulk file rename python command line application) ala Perl rename.pl
+My Own Rename (bulk file rename python command line application) ala Perl by Larry Wall rename.pl
 
 # Requirements
-
 Software: based on python 3
 
 # USAGE
-
     usage: rename.py [-h] [--root ROOT] [-s START] [-c CONTAINS] [-r REPLACE] [-x SUFFIX] [-k SKIP] [-p PATTERN] [-b SUB] [-n]
                  [-e] [-f] [-R] [-u] [-l] [-C] [-v]
 
@@ -49,14 +46,27 @@ rename files
     rename.py -s start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
     rename.py -s start_of_file -p This -b That -k 5 -n -x mp3 -f
     would do the same
- 
+The Pattern and Sub can be REGULAR Expression as they will be feeded into python re.sub(pattern, sub, string)
+Besides, pattern can be in the form of:
+
+    's/ALPHA.*/Beta/' 
+that will result in: 
+
+    pattern='ALPHA.*' 
+    sub='Beta'
+and will work.
+
 ## Installation
+
+Easy as make install
+(will simply copy the file rename.py in /usr/local/bin)
 
 
 ## Configuration
+Do we need one?
 
 ## Development
 There is plenty of space for development
 
 ## License MIT
-
+What other decent licenses exists?
