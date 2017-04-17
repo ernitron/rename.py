@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-# ernitron (c) 2017
+# -*- coding: utf-8 -*-
+# File: rename.py
+# Author: ernitron (c) 2017
 # Mit License
-
 
 import os
 import sys
 import re
+
+Version = "1.1.5"
 
 # To print colored text on term
 RED   = '\033[1;31m'
@@ -15,6 +18,16 @@ GREEN = '\033[0;32m'
 RESET = '\033[0;0m'
 BOLD  = '\033[;1m'
 REV   = '\033[;7m'
+
+def nocolor():
+    global RED, BLUE, CYAN, GREEN, RESET, BOLD, REV
+    RED   = ''
+    BLUE  = ''
+    CYAN  = ''
+    GREEN = ''
+    RESET = ''
+    BOLD  = ''
+    REV   = ''
 
 def camel_case(fname):
     '''Convert to camel case: returns newname'''
@@ -27,7 +40,7 @@ def replace_space(fname, fill_char='_'):
     return fname.replace(' ', fill_char)
 
 def replace_content(fname, contains=None, replace=None):
-    if contains and contains in path:
+    if contains and contains in fname:
         if replace is not None:
             return fname.replace(contains, replace)
     return fname
@@ -66,41 +79,44 @@ def substitute(fname, pattern, sub):
     if not sub: sub = ''
     return re.sub(pattern, sub, fname)
 
-def renaming(start=None, skip=None, contains=None, replace=None, number=False, endnum=False, suffix=None, force=False, verbose=False,  tolow=False, toupper=False, camel=False, pattern=None, sub=None):
+def renaming(a):
     counter = 1
     endcounter = 1
-    for filename in os.listdir('.'):
+    for filename in os.listdir():
         newname, extension = os.path.splitext(filename)
         extension = extension.lower()
 
-        if suffix and not suffix in extension:
+        if a.suffix and not a.suffix in extension:
             continue
-        if contains and not contains in path:
+        if a.contains and not a.contains in filename:
             continue
-        if verbose:
+        if a.verbose:
             print(CYAN, filename, RESET)
 
-        if start or skip:
-            newname = skip_name(newname, start, skip)
-        if contains and replace:
-            newname = replace_content(newname, contains, replace)
-        if camel:
+        if a.start or a.skip:
+            newname = skip_name(newname, a.start, a.skip)
+        if a.contains and a.replace:
+            newname = replace_content(newname, a.contains, a.replace)
+        if a.camel:
             newname = camel_case(newname)
-        if toupper:
+        if a.upper:
             newname = upper_case(newname)
-        if tolow:
-        if pattern:
-            newname = substitute(newname, pattern, sub)
-        if number:
+        if a.lower:
+            newname = lower_case(newname)
+        if a.pattern:
+            newname = substitute(newname, a.pattern, a.sub)
+        if a.space:
+            newname = replace_space(newname)
+        if a.number:
             newname = add_number(newname, counter)
             counter += 1
-        if endnum:
+        if a.endnum:
             newname = add_endnum(newname, counter)
             endcounter += 1
 
         newname = newname + extension
 
-        do_rename(filename, newname, force)
+        do_rename(filename, newname, a.force)
 
 def do_rename(oldname, newname, force):
     if oldname == newname or not newname :
@@ -130,39 +146,51 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='rename files', epilog=example_text,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument('--root', default='.')
-    parser.add_argument('-s', '--start', help='replace start of filename', default=None)
+    parser.add_argument('--root', default='./')
+    parser.add_argument('-b', '--sub', help='substitution', default=None)
     parser.add_argument('-c', '--contains', help='check if contains pattern', default=None)
-    parser.add_argument('-r', '--replace', help='replace pattern of contains', default=None)
-    parser.add_argument('-x', '--suffix', help='it must have suffix like .mp3', default=None)
     parser.add_argument('-k', '--skip', help='skip this number of char from file', default=None)
     parser.add_argument('-p', '--pattern', help='pattern', default=None)
-    parser.add_argument('-b', '--sub', help='substitution', default=None)
+    parser.add_argument('-r', '--replace', help='replace pattern of contains', default=None)
+    parser.add_argument('-s', '--start', help='replace start of filename', default=None)
+    parser.add_argument('-x', '--suffix', help='it must have suffix like .mp3', default=None)
     # Bool
-    parser.add_argument('-n', '--number', action='store_true', help='add a 2 digit sequence start of filename', default=False)
+    parser.add_argument('-a', '--space', action='store_true', help='no space or replace space', default=False)
     parser.add_argument('-e', '--endnum', action='store_true', help='add a 2 digit sequence end of filename', default=False)
     parser.add_argument('-f', '--force', action='store_true', help='force to rename otherwise it just print', default=False)
-    parser.add_argument('-R', '--recursive', action='store_true', help='Recursive', default=False)
+    parser.add_argument('-n', '--number', action='store_true', help='add a 2 digit sequence start of filename', default=False)
     parser.add_argument('-u', '--upper', action='store_true', help='To upper', default=False)
     parser.add_argument('-l', '--lower', action='store_true', help='To lower', default=False)
+    parser.add_argument('-R', '--recursive', action='store_true', help='Recursive', default=False)
     parser.add_argument('-C', '--camel', action='store_true', help='CamelCase', default=False)
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output', default=False)
+    parser.add_argument('-V', '--version', action='store_true', help='print version', default=False)
+    parser.add_argument('-L', '--nocolor', action='store_true', help='print version', default=False)
 
     # get args
     args = parser.parse_args()
-    if not any([args.start, args.contains, args.replace, args.skip, args.force, args.pattern, args.sub, args.lower, args.upper, args.camel, args.verbose]):
+    if not any([args.start, args.space, args.contains, args.replace, args.skip, args.force, args.pattern, args.sub, args.lower, args.upper, args.camel, args.verbose]):
+        print("Version ", Version)
         parser.print_help()
+        print("Sorry but I have nothing to do, did you try with some flags?\n\n")
         sys.exit(0)
 
+    if args.version:
+        print("Version ", Version)
+        sys.exit(0)
+
+    # If it is piped to other program (i.e. rename.py... | less) than don't color print!
+    if not os.isatty(1) or args.nocolor:
+        nocolor()
+
     # Where to start, what to get
-    root = os.path.abspath(args.root)
-    current_dir = os.path.dirname('./')
-    os.chdir(current_dir)
-    renaming(args.start, args.skip, args.contains, args.replace, args.number, args.endnum, args.suffix, args.force, args.verbose, args.lower, args.upper, args.camel, args.pattern, args.sub)
+    os.chdir(args.root)
 
     if args.recursive:
-      for top, subdirs, files in os.walk(root):
-        for d in subdirs:
-            newdir = os.path.join(top, d)
-            os.chdir(newdir)
-            renaming(args.start, args.skip, args.contains, args.replace, args.number, args.endnum, args.suffix, args.force, args.verbose, args.lower, args.upper, args.camel, args.pattern, args.sub)
+        for top, subdirs, files in os.walk(args.root):
+            for d in subdirs:
+                newdir = os.path.join(top, d)
+                os.chdir(newdir)
+                renaming(args)
+    else:
+        renaming(args)
