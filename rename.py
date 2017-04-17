@@ -167,7 +167,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--start', help='replace start of filename', default=None)
     parser.add_argument('-x', '--suffix', help='apply only file with suffix like .mp3', default=None)
     # Bool
-    parser.add_argument('-a', '--space', action='store_true', help='no space or replace space', default=False)
+    parser.add_argument('-a', '--space', action='store_true', help='replace space with _', default=False)
     parser.add_argument('-e', '--endnum', action='store_true', help='add a 2 digit sequence end of filename', default=False)
     parser.add_argument('-f', '--force', action='store_true', help='force to rename otherwise it just print', default=False)
     parser.add_argument('-n', '--number', action='store_true', help='add a 2 digit sequence start of filename', default=False)
@@ -181,7 +181,7 @@ if __name__ == '__main__':
 
     # get args
     args = parser.parse_args()
-    if not any([args.start, args.space, args.contains, args.replace, args.skip, args.force, args.pattern, args.lower, args.upper, args.camel, args.verbose]):
+    if not any([args.start, args.space, args.contains, args.replace, args.skip, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.endnum, args.verbose]):
         print("Version ", Version)
         parser.print_help()
         print("Sorry but I have nothing to do, did you try with some flags?\n\n")
