@@ -29,8 +29,22 @@ def nocolor():
     BOLD  = ''
     REV   = ''
 
+def skip_name(fname, skip=None):
+    '''Skip first chars in filename: returns: newname '''
+    startlen = 0
+    if skip and skip.isdigit():
+        startlen = int(skip)
+
+def start_name(fname, start=None, replace=None):
+    '''Skip string in filename: returns: newname '''
+    if start and fname.startswith(start):
+        startlen = len(skip)
+        if not replace: replace = ''
+        return replace + fname[startlen:]
+    return fname
+
 def camel_case(fname):
-    '''Convert to camel case: returns newname'''
+    '''Convert to CamelCase: returns newname'''
     tmpname = fname.replace('_', ' ')
     modified_name = re.findall('[\w]+', tmpname.lower())
     return ''.join([word.title() for word in modified_name])
@@ -40,6 +54,7 @@ def replace_space(fname, fill_char='_'):
     return fname.replace(' ', fill_char)
 
 def replace_content(fname, contains=None, replace=None):
+    '''Replace content with replace string :returns newname '''
     if contains and contains in fname:
         if not replace:
             replace = ''
@@ -54,24 +69,13 @@ def upper_case(fname):
     '''Upper filename :returns newname '''
     return fname.upper()
 
-def skip_name(fname, skip=None):
-    '''Skip first chars in filename: returns: newname '''
-    startlen = 0
-    if skip and skip.isdigit():
-        startlen = int(skip)
-
-def start_name(fname, start=None):
-    '''Skip string in filename: returns: newname '''
-    startlen = 0
-    if start and fname.startswith(start):
-        startlen = len(skip)
-    return fname[startlen:]
-
 def add_number(fname, counter):
-     return '%02d-%s' % (counter, fname)
+    '''Add a sequence 2digit at beginning of filename :returns newname '''
+    return '%02d-%s' % (counter, fname)
 
 def add_endnum(fname, counter):
-     return '%s-%02d' % (fname, counter)
+    '''Add a sequence 2digit at end of filename :returns newname '''
+    return '%s-%02d' % (fname, counter)
 
 def substitute(fname, pattern, sub):
     if not pattern: return fname
@@ -83,21 +87,19 @@ def substitute(fname, pattern, sub):
     return re.sub(pattern, sub, fname)
 
 def renaming(a):
+    '''The loop on current dir to rename files based on requests'''
     counter = 1
     endcounter = 1
     for filename in os.listdir():
         newname, extension = os.path.splitext(filename)
         extension = extension.lower()
 
-        if a.directory:
-            if not os.path.isdir(filename): 
-                continue
-        if a.regular:
-            if not os.path.isfile(filename): 
-                continue
-        if a.match:
-            if not re.match(a.match, filename):
-                continue
+        if a.directory and not os.path.isdir(filename): 
+            continue
+        if a.regular and not os.path.isfile(filename): 
+            continue
+        if a.match and not re.match(a.match, filename):
+            continue
         if a.suffix and not a.suffix in extension:
             continue
         if a.contains and not a.contains in filename:
@@ -106,7 +108,7 @@ def renaming(a):
             print(CYAN, filename, RESET)
 
         if a.start:
-            newname = start_name(newname, a.start)
+            newname = start_name(newname, a.start, a.replace)
         if a.skip:
             newname = skip_name(newname, a.skip)
         if a.contains and a.replace:
@@ -146,14 +148,14 @@ def do_rename(oldname, newname, force):
 if __name__ == '__main__':
     import argparse
 
-    example_text = '''Examples:
- rename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
- would rename a file like: start_of_file1234_Take_This.mp3
+    example_text = '''\tExamples:
+\trename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
+\twould rename a file like: start_of_file1234_Take_This.mp3
                      into: 01-Take_That.mp3
 
- rename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
- rename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
- would do the same
+\trename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
+\trename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
+\twould do the same
  '''
 
     parser = argparse.ArgumentParser(description='rename files', epilog=example_text,
