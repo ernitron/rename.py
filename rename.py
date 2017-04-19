@@ -55,13 +55,16 @@ def upper_case(fname):
     return fname.upper()
 
 def skip_name(fname, skip=None):
-    '''Skip string or in filename: returns: newname '''
+    '''Skip first chars in filename: returns: newname '''
     startlen = 0
-    if skip:
-        if skip.isdigit():
-            startlen = int(skip)
-        elif skip in fname:
-            startlen = len(skip)
+    if skip and skip.isdigit():
+        startlen = int(skip)
+
+def start_name(fname, start=None):
+    '''Skip string in filename: returns: newname '''
+    startlen = 0
+    if start and fname.startswith(start):
+        startlen = len(skip)
     return fname[startlen:]
 
 def add_number(fname, counter):
@@ -102,6 +105,8 @@ def renaming(a):
         if a.verbose:
             print(CYAN, filename, RESET)
 
+        if a.start:
+            newname = start_name(newname, a.start)
         if a.skip:
             newname = skip_name(newname, a.skip)
         if a.contains and a.replace:
@@ -158,9 +163,10 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--contains', help='check for string in filename; works with -r', default=None)
     parser.add_argument('-p', '--pattern', help='pattern with regex', default=None)
     parser.add_argument('-r', '--replace', help='replace for match string; works with -c and -p', default=None)
-    parser.add_argument('-k', '--skip', help='skip this number of char from file', default=None)
+    parser.add_argument('-k', '--skip', help='skip this number of char from filename', default=None)
+    parser.add_argument('-s', '--start', help='delete string from beginning of filename', default=None)
     parser.add_argument('-m', '--match', help='apply only to file that match pattern', default=None)
-    parser.add_argument('-x', '--suffix', help='apply only file with suffix like .mp3', default=None)
+    parser.add_argument('-x', '--suffix', help='apply only to file with suffix like .mp3', default=None)
     # Bool
     parser.add_argument('-f', '--force', action='store_true', help='force to rename otherwise it just print', default=False)
     parser.add_argument('-A', '--space', action='store_true', help='replace space with _', default=False)
@@ -179,7 +185,7 @@ if __name__ == '__main__':
     # get args
     args = parser.parse_args()
 
-    if not any([args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.endnum, args.verbose]):
+    if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.endnum, args.verbose]):
         print("Version ", Version)
         parser.print_help()
         print("Sorry but I have nothing to do, did you try with some flags?\n\n")

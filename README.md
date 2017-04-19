@@ -22,6 +22,7 @@ rename files
                             pattern with regex
       -r REPLACE, --replace REPLACE
                             replace for match string; works with -c and -p
+      -s START, --skip START  start the string from file
       -k SKIP, --skip SKIP  skip this number of char from file
       -m MATCH, --match MATCH
                             apply only to file that match pattern
@@ -42,12 +43,13 @@ rename files
       -v, --verbose         verbose output
 
 Examples:
-    rename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
+
+    rename.py --start start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
     would rename a file like: start_of_file1234_Take_This.mp3
                      into: 01-Take_That.mp3
 
-    rename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
-    rename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
+    rename.py -s start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
+    rename.py -s start_of_file -p This -r That -k 5 -n -x mp3 -f
     would do the same
  
 The Pattern and Sub can be REGULAR Expression as they will be feeded into python re.sub(pattern, sub, string)
