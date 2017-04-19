@@ -31,8 +31,8 @@ def nocolor():
 
 def camel_case(fname):
     '''Convert to camel case: returns newname'''
-    oldname = fname.replace('_', ' ')
-    modified_name = re.findall('[\w]+', oldname.lower())
+    tmpname = fname.replace('_', ' ')
+    modified_name = re.findall('[\w]+', tmpname.lower())
     return ''.join([word.title() for word in modified_name])
 
 def replace_space(fname, fill_char='_'):
@@ -44,7 +44,7 @@ def replace_content(fname, contains=None, replace=None):
         if not replace:
             replace = ''
             return fname.replace(contains, replace)
-    return fname
+    else: return fname
 
 def lower_case(fname):
     '''Lower filename :returns newname '''
@@ -55,19 +55,13 @@ def upper_case(fname):
     return fname.upper()
 
 def skip_name(fname, skip=None):
-    '''Skip in filename: returns: newname '''
+    '''Skip string or in filename: returns: newname '''
     startlen = 0
-    if skip and skip.isdigit():
-        startlen += int(skip)
-    # Initialize newname
-    return fname[startlen:]
-
-def start_name(fname, start=None):
-    '''Skip start in filename: returns: newname '''
-    startlen = 0
-    if start and fname.startswith(start):
-        startlen += len(start)
-    # Initialize newname
+    if skip:
+        if skip.isdigit():
+            startlen = int(skip)
+        elif skip in fname:
+            startlen = len(skip)
     return fname[startlen:]
 
 def add_number(fname, counter):
@@ -92,10 +86,15 @@ def renaming(a):
         newname, extension = os.path.splitext(filename)
         extension = extension.lower()
 
+        if a.directory:
+            if not os.path.isdir(filename): 
+                continue
+        if a.regular:
+            if not os.path.isfile(filename): 
+                continue
         if a.match:
             if not re.match(a.match, filename):
                 continue
-
         if a.suffix and not a.suffix in extension:
             continue
         if a.contains and not a.contains in filename:
@@ -105,8 +104,6 @@ def renaming(a):
 
         if a.skip:
             newname = skip_name(newname, a.skip)
-        if a.start:
-            newname = start_name(newname, a.start)
         if a.contains and a.replace:
             newname = replace_content(newname, a.contains, a.replace)
         if a.pattern:
@@ -125,33 +122,32 @@ def renaming(a):
         if a.endnum:
             newname = add_endnum(newname, counter)
             endcounter += 1
-
+        # Finally do the rename on file or directory
         newname = newname + extension
-
         do_rename(filename, newname, a.force)
 
 def do_rename(oldname, newname, force):
-    if oldname == newname or not newname :
+    if oldname == newname or not newname:
         print('Nothing to change for ', RED, oldname, RESET)
         return
     if newname and force:
         try:
             os.rename(oldname, newname)
+            print(oldname)
         except:
             print('Cannot rename ', RED, oldname, RESET)
-            return
-    print(oldname, '\n\t=>', GREEN, newname, RESET)
+    print('\t=>', GREEN, newname, RESET)
 
 if __name__ == '__main__':
     import argparse
 
     example_text = '''Examples:
- rename.py --start start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
+ rename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
  would rename a file like: start_of_file1234_Take_This.mp3
                      into: 01-Take_That.mp3
 
- rename.py -s start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
- rename.py -s start_of_file -p This -r That -k 5 -n -x mp3 -f
+ rename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
+ rename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
  would do the same
  '''
 
@@ -164,24 +160,27 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--replace', help='replace for match string; works with -c and -p', default=None)
     parser.add_argument('-k', '--skip', help='skip this number of char from file', default=None)
     parser.add_argument('-m', '--match', help='apply only to file that match pattern', default=None)
-    parser.add_argument('-s', '--start', help='replace start of filename', default=None)
     parser.add_argument('-x', '--suffix', help='apply only file with suffix like .mp3', default=None)
     # Bool
-    parser.add_argument('-a', '--space', action='store_true', help='replace space with _', default=False)
-    parser.add_argument('-e', '--endnum', action='store_true', help='add a 2 digit sequence end of filename', default=False)
     parser.add_argument('-f', '--force', action='store_true', help='force to rename otherwise it just print', default=False)
-    parser.add_argument('-n', '--number', action='store_true', help='add a 2 digit sequence start of filename', default=False)
-    parser.add_argument('-u', '--upper', action='store_true', help='To upper', default=False)
-    parser.add_argument('-l', '--lower', action='store_true', help='To lower', default=False)
-    parser.add_argument('-R', '--recursive', action='store_true', help='Recursive', default=False)
+    parser.add_argument('-A', '--space', action='store_true', help='replace space with _', default=False)
     parser.add_argument('-C', '--camel', action='store_true', help='CamelCase', default=False)
-    parser.add_argument('-v', '--verbose', action='store_true', help='verbose output', default=False)
+    parser.add_argument('-E', '--endnum', action='store_true', help='add a 2 digit sequence end of filename', default=False)
+    parser.add_argument('-N', '--number', action='store_true', help='add a 2 digit sequence start of filename', default=False)
+    parser.add_argument('-D', '--directory', action='store_true', help='apply only to directory', default=False)
+    parser.add_argument('-F', '--regular', action='store_true', help='apply only to regular files', default=False)
+    parser.add_argument('-U', '--upper', action='store_true', help='To upper', default=False)
+    parser.add_argument('-L', '--lower', action='store_true', help='To lower', default=False)
+    parser.add_argument('-R', '--recursive', action='store_true', help='Recursive', default=False)
     parser.add_argument('-V', '--version', action='store_true', help='print version', default=False)
-    parser.add_argument('-L', '--nocolor', action='store_true', help='print version', default=False)
+    parser.add_argument('-O', '--nocolor', action='store_true', help='print version', default=False)
+    parser.add_argument('-v', '--verbose', action='store_true', help='verbose output', default=False)
 
     # get args
     args = parser.parse_args()
-    if not any([args.start, args.space, args.contains, args.replace, args.skip, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.endnum, args.verbose]):
+    print(type(args))
+
+    if not any([args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.endnum, args.verbose]):
         print("Version ", Version)
         parser.print_help()
         print("Sorry but I have nothing to do, did you try with some flags?\n\n")
