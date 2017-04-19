@@ -178,7 +178,6 @@ if __name__ == '__main__':
 
     # get args
     args = parser.parse_args()
-    print(type(args))
 
     if not any([args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.endnum, args.verbose]):
         print("Version ", Version)
