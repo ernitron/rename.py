@@ -6,51 +6,59 @@ My Own Rename (bulk file rename python command line application) ala Perl rename
 Software: works with python 3 (but I guess with 2.7 is ok)
 
 # USAGE
-
     usage: rename.py [-h] [--root ROOT] [-c CONTAINS] [-p PATTERN] [-r REPLACE]
-                 [-k SKIP] [-m MATCH] [-x SUFFIX] [-f] [-A] [-C] [-E] [-N]
-                 [-D] [-F] [-U] [-L] [-R] [-V] [-O] [-v]
+                 [-k SKIP] [-s START] [-m MATCH] [-t COUNTER] [-x SUFFIX] [-f]
+                 [-A] [-C] [-E] [-N] [-D] [-F] [-U] [-L] [-R] [-V] [-O] [-Y]
+                 [-T] [-v]
 
 rename files
 
     optional arguments:
       -h, --help            show this help message and exit
-      --root ROOT
+      --root ROOT           this will be the root directory
       -c CONTAINS, --contains CONTAINS
                             check for string in filename; works with -r
       -p PATTERN, --pattern PATTERN
                             pattern with regex
       -r REPLACE, --replace REPLACE
                             replace for match string; works with -c and -p
-      -s START, --skip START  start the string from file
-      -k SKIP, --skip SKIP  skip this number of char from file
+      -k SKIP, --skip SKIP  skip this number of char from filename
+      -s START, --start START
+                            delete string from beginning of filename
       -m MATCH, --match MATCH
                             apply only to file that match pattern
+      -t COUNTER, --counter COUNTER
+                            initialize with some value the sequence
       -x SUFFIX, --suffix SUFFIX
-                            apply only file with suffix like .mp3
-      -f, --force           force to rename otherwise it just print
-      -A, --space           replace space with _
-      -C, --camel           CamelCase
-      -E, --endnum          add a 2 digit sequence end of filename
-      -N, --number          add a 2 digit sequence start of filename
-      -D, --directory       apply only to directory
-      -F, --regular         apply only to regular files
-      -U, --upper           To upper
-      -L, --lower           To lower
-      -R, --recursive       Recursive
-      -V, --version         print version
-      -O, --nocolor         print version
+                            apply only to file with suffix like .mp3
+      -f, --force           Force to rename (actual do the rename)
+      -A, --space           Replace space with _
+      -C, --camel           Transform filename in CamelCase
+      -E, --endnum          Add a 2 digit sequence end of filename
+      -N, --number          Add a 2 digit sequence start of filename
+      -D, --directory       Apply only to directory
+      -F, --regular         Apply only to regular files
+      -U, --upper           Transform filename into upper case
+      -L, --lower           Transform filename into lower case
+      -R, --recursive       Recursive into subdirs
+      -V, --version         Print version and die
+      -O, --nocolor         Print without color
+      -Y, --yes             Confirm before rename [y/n]
+      -T, --timestamp       prefix with timestamp of file access time
       -v, --verbose         verbose output
 
-Examples:
-
-    rename.py --start start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
-    would rename a file like: start_of_file1234_Take_This.mp3
+	Examples:
+	rename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
+	would rename a file like: start_of_file1234_Take_This.mp3
                      into: 01-Take_That.mp3
 
-    rename.py -s start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
-    rename.py -s start_of_file -p This -r That -k 5 -n -x mp3 -f
-    would do the same
+	rename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
+	rename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
+	would do the same
+ 
+Sorry but I have nothing to do, did you try with some flags?
+
+
  
 The Pattern and Sub can be REGULAR Expression as they will be feeded into python re.sub(pattern, sub, string)
 Besides, pattern can be in the form of:
