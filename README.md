@@ -8,8 +8,8 @@ Software: works with python 3 (but I guess with 2.7 is ok)
 # USAGE
     usage: rename.py [-h] [--root ROOT] [-c CONTAINS] [-p PATTERN] [-r REPLACE]
                  [-k SKIP] [-s START] [-m MATCH] [-t COUNTER] [-x SUFFIX] [-f]
-                 [-A] [-C] [-E] [-N] [-D] [-F] [-U] [-L] [-R] [-V] [-O] [-Y]
-                 [-T] [-v]
+                 [-A] [-B] [-C] [-N] [-D] [-F] [-U] [-L] [-E] [-R] [-V] [-O]
+                 [-Y] [-T] [-v]
 
 rename files
 
@@ -33,13 +33,14 @@ rename files
                             apply only to file with suffix like .mp3
       -f, --force           Force to rename (actual do the rename)
       -A, --space           Replace space with _
+      -B, --beginning       put sequence at beginning or end
       -C, --camel           Transform filename in CamelCase
-      -E, --endnum          Add a 2 digit sequence end of filename
       -N, --number          Add a 2 digit sequence start of filename
       -D, --directory       Apply only to directory
       -F, --regular         Apply only to regular files
       -U, --upper           Transform filename into upper case
       -L, --lower           Transform filename into lower case
+      -E, --extlower        Transform extension into lower case
       -R, --recursive       Recursive into subdirs
       -V, --version         Print version and die
       -O, --nocolor         Print without color
@@ -47,17 +48,15 @@ rename files
       -T, --timestamp       prefix with timestamp of file access time
       -v, --verbose         verbose output
 
-	Examples:
-	rename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
-	would rename a file like: start_of_file1234_Take_This.mp3
-                     into: 01-Take_That.mp3
+            Examples:
+            rename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
+            would rename a file like: start_of_file1234_Take_This.mp3
+                         into: 01-Take_That.mp3
 
-	rename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
-	rename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
-	would do the same
- 
-Sorry but I have nothing to do, did you try with some flags?
-
+            rename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
+            rename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
+            would do the same
+     
 
  
 The Pattern and Sub can be REGULAR Expression as they will be feeded into python re.sub(pattern, sub, string)
