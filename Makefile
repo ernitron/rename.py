@@ -16,7 +16,7 @@ INSTALLDIR=/usr/local/bin/
 APPLICATION= rename.py \
 
 check:
-	python -m py_compile *.py
+	python3 -m py_compile *.py
 	rm -f *.pyc
 
 run: check

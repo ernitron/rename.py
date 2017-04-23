@@ -6,16 +6,18 @@ My Own Rename (bulk file rename python command line application) ala Perl rename
 Software: works with python 3 (but I guess with 2.7 is ok)
 
 # USAGE
-    usage: rename.py [-h] [--root ROOT] [-c CONTAINS] [-p PATTERN] [-r REPLACE]
-                 [-k SKIP] [-s START] [-m MATCH] [-t COUNTER] [-x SUFFIX] [-f]
-                 [-A] [-B] [-C] [-N] [-D] [-F] [-U] [-L] [-E] [-R] [-V] [-O]
-                 [-Y] [-T] [-v]
+    usage: rename.py [-h] [--root ROOT] [-a [SPACE]] [-c CONTAINS] [-p PATTERN]
+                 [-r REPLACE] [-k SKIP] [-s START] [-n [NUMBER]] [-m MATCH]
+                 [-x SUFFIX] [-f] [-B] [-C] [-D] [-F] [-L] [-E] [-U] [-R] [-V]
+                 [-O] [-Y] [-T] [-v]
 
 rename files
 
     optional arguments:
       -h, --help            show this help message and exit
       --root ROOT           this will be the root directory
+      -a [SPACE], --space [SPACE]
+                            Replace space with _
       -c CONTAINS, --contains CONTAINS
                             check for string in filename; works with -r
       -p PATTERN, --pattern PATTERN
@@ -25,27 +27,25 @@ rename files
       -k SKIP, --skip SKIP  skip this number of char from filename
       -s START, --start START
                             delete string from beginning of filename
+      -n [NUMBER], --number [NUMBER]
+                            Add a 2 digit sequence start of filename
       -m MATCH, --match MATCH
                             apply only to file that match pattern
-      -t COUNTER, --counter COUNTER
-                            initialize with some value the sequence
       -x SUFFIX, --suffix SUFFIX
                             apply only to file with suffix like .mp3
-      -f, --force           Force to rename (actual do the rename)
-      -A, --space           Replace space with _
-      -B, --beginning       put sequence at beginning or end
+      -f, --force           Force to rename (do it!)
+      -B, --bottom          put sequence at end
       -C, --camel           Transform filename in CamelCase
-      -N, --number          Add a 2 digit sequence start of filename
       -D, --directory       Apply only to directory
       -F, --regular         Apply only to regular files
-      -U, --upper           Transform filename into upper case
       -L, --lower           Transform filename into lower case
       -E, --extlower        Transform extension into lower case
+      -U, --upper           Transform filename into upper case
       -R, --recursive       Recursive into subdirs
       -V, --version         Print version and die
       -O, --nocolor         Print without color
       -Y, --yes             Confirm before rename [y/n]
-      -T, --timestamp       prefix with timestamp of file access time
+      -T, --timestamp       add timestamp of access time
       -v, --verbose         verbose output
 
             Examples:
@@ -56,8 +56,6 @@ rename files
             rename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
             rename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
             would do the same
-     
-
  
 The Pattern and Sub can be REGULAR Expression as they will be feeded into python re.sub(pattern, sub, string)
 Besides, pattern can be in the form of:

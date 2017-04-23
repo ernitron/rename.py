@@ -68,12 +68,12 @@ def upper_case(fname):
     '''Upper filename :returns newname'''
     return fname.upper()
 
-def add_number(fname, counter, beginning):
+def add_number(fname, counter, bottom):
     '''Add a sequence 2digit at beginning of filename :returns newname '''
-    if beginning:
-        return '%02d-%s' % (counter, fname)
-    else:
+    if bottom:
         return '%s-%02d' % (fname, counter)
+    else:
+        return '%02d-%s' % (counter, fname)
 
 def substitute(fname, pattern, replace):
     if not pattern: return fname
@@ -84,20 +84,20 @@ def substitute(fname, pattern, replace):
         pass
     return re.sub(pattern, replace, fname)
 
-def timestamp_name(fname, newname, initial):
+def timestamp_name(fname, newname, bottom):
     from time import localtime, strftime
     filestat = os.stat(fname)
     timestring = strftime("%Y-%m-%d-%H:%M:%S", localtime(filestat.st_mtime))
-    if initial :
-        return f'{timestring}-{newname}'
-    else:
+    if bottom:
         return f'{newname}-{timestring}'
+    else:
+        return f'{timestring}-{newname}'
 
 def renaming(a):
     '''The loop on current dir to rename files based on requests'''
     # initialize counter
     try:
-        counter = int(a.counter)
+        counter = int(a.number)
     except:
         counter = 1
 
@@ -120,7 +120,7 @@ def renaming(a):
             newname = start_name(newname, a.start, a.replace)
         if a.skip:
             newname = skip_name(newname, a.skip)
-        if a.contains and a.replace:
+        if a.contains:
             newname = replace_content(newname, a.contains, a.replace)
         if a.pattern:
             newname = substitute(newname, a.pattern, a.replace)
@@ -131,11 +131,11 @@ def renaming(a):
         if a.lower:
             newname = lower_case(newname)
         if a.space:
-            newname = replace_space(newname)
+            newname = replace_space(newname, fill_char=a.space)
         if a.timestamp:
-            newname = timestamp_name(filename, newname)
+            newname = timestamp_name(filename, newname, a.bottom)
         if a.number:
-            newname = add_number(newname, counter, a.beginning)
+            newname = add_number(newname, counter, a.bottom)
             counter += 1
 
         # Finally do the rename on file or directory
@@ -181,31 +181,30 @@ if __name__ == '__main__':
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('--root', help='this will be the root directory', default='./')
-    parser.add_argument('-c', '--contains', help='check for string in filename; works with -r', default='')
-    parser.add_argument('-p', '--pattern', help='pattern with regex', default='')
+    parser.add_argument('-a', '--space', help='Replace space with _', nargs='?', const='_')
+    parser.add_argument('-c', '--contains', help='check for string in filename; works with -r')
+    parser.add_argument('-p', '--pattern', help='pattern with regex')
     parser.add_argument('-r', '--replace', help='replace for match string; works with -c and -p', default='')
-    parser.add_argument('-k', '--skip', help='skip this number of char from filename', default='')
-    parser.add_argument('-s', '--start', help='delete string from beginning of filename', default='')
-    parser.add_argument('-m', '--match', help='apply only to file that match pattern', default='')
-    parser.add_argument('-t', '--counter', help='initialize with some value the sequence', default='1')
-    parser.add_argument('-x', '--suffix', help='apply only to file with suffix like .mp3', default='')
+    parser.add_argument('-k', '--skip', help='skip this number of char from filename')
+    parser.add_argument('-s', '--start', help='delete string from beginning of filename')
+    parser.add_argument('-n', '--number', help='Add a 2 digit sequence start of filename', nargs='?', const='1')
+    parser.add_argument('-m', '--match', help='apply only to file that match pattern')
+    parser.add_argument('-x', '--suffix', help='apply only to file with suffix like .mp3')
     # Bool
-    parser.add_argument('-f', '--force', action='store_true', help='Force to rename (actual do the rename)', default=False)
-    parser.add_argument('-A', '--space', action='store_true', help='Replace space with _', default=False)
-    parser.add_argument('-B', '--beginning', action='store_true', help='put sequence at beginning or end', default=False)
-    parser.add_argument('-C', '--camel', action='store_true', help='Transform filename in CamelCase', default=False)
-    parser.add_argument('-N', '--number', action='store_true', help='Add a 2 digit sequence start of filename', default=False)
-    parser.add_argument('-D', '--directory', action='store_true', help='Apply only to directory', default=False)
-    parser.add_argument('-F', '--regular', action='store_true', help='Apply only to regular files', default=False)
-    parser.add_argument('-U', '--upper', action='store_true', help='Transform filename into upper case', default=False)
-    parser.add_argument('-L', '--lower', action='store_true', help='Transform filename into lower case', default=False)
-    parser.add_argument('-E', '--extlower', action='store_true', help='Transform extension into lower case', default=False)
-    parser.add_argument('-R', '--recursive', action='store_true', help='Recursive into subdirs', default=False)
-    parser.add_argument('-V', '--version', action='store_true', help='Print version and die', default=False)
-    parser.add_argument('-O', '--nocolor', action='store_true', help='Print without color', default=False)
-    parser.add_argument('-Y', '--yes', action='store_false', help='Confirm before rename [y/n]', default=True)
-    parser.add_argument('-T', '--timestamp', action='store_true', help='prefix with timestamp of file access time', default=False)
-    parser.add_argument('-v', '--verbose', action='store_true', help='verbose output', default=False)
+    parser.add_argument('-f', '--force', action='store_true', help='Force to rename (do it!)', default=False)
+    parser.add_argument('-B', '--bottom', action='store_true', help='put sequence at end')
+    parser.add_argument('-C', '--camel', action='store_true', help='Transform filename in CamelCase')
+    parser.add_argument('-D', '--directory', action='store_true', help='Apply only to directory')
+    parser.add_argument('-F', '--regular', action='store_true', help='Apply only to regular files')
+    parser.add_argument('-L', '--lower', action='store_true', help='Transform filename into lower case')
+    parser.add_argument('-E', '--extlower', action='store_true', help='Transform extension into lower case')
+    parser.add_argument('-U', '--upper', action='store_true', help='Transform filename into upper case')
+    parser.add_argument('-R', '--recursive', action='store_true', help='Recursive into subdirs')
+    parser.add_argument('-V', '--version', action='store_true', help='Print version and die')
+    parser.add_argument('-O', '--nocolor', action='store_true', help='Print without color')
+    parser.add_argument('-Y', '--yes', action='store_false', help='Confirm before rename [y/n]')
+    parser.add_argument('-T', '--timestamp', action='store_true', help='add timestamp of access time')
+    parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
 
     # get args
     args = parser.parse_args()
