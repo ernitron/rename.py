@@ -17,7 +17,7 @@ APPLICATION= rename.py \
 
 check:
 	python3 -m py_compile *.py
-	rm -f *.pyc
+	rm -rf *.pyc __pycache__
 
 run: check
 	python $(APPLICATION)

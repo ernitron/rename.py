@@ -157,6 +157,8 @@ def renaming(a):
             counter += 1
         if a.strip:
             newname = strip_name(newname)
+        if a.extension:
+           extension = a.extension
 
         # Finally do the rename on file or directory
         newname = newname + extension
@@ -214,6 +216,7 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--number', help='Add a 2 digit sequence start of filename', nargs='?', const='1')
     parser.add_argument('-m', '--match', help='apply only to file that match pattern')
     parser.add_argument('-x', '--suffix', help='apply only to file with suffix like .mp3')
+    parser.add_argument('-e', '--extension', help='change extension .mp3')
     # Bool
     parser.add_argument('-f', '--force', action='store_true', help='Force to rename (do it!)', default=False)
     parser.add_argument('-B', '--bottom', action='store_true', help='put sequence at end')
@@ -234,7 +237,7 @@ if __name__ == '__main__':
     # get args
     args = parser.parse_args()
 
-    if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.extlower, args.verbose]):
+    if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.extlower, args.extension, args.verbose]):
         print("Version ", Version)
         parser.print_help()
         print("Sorry but I have nothing to do, did you try with some flags?\n\n")
