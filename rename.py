@@ -91,7 +91,7 @@ def substitute(fname, pattern, replace):
     if pattern[-1] == 'i':
         flags = re.IGNORECASE
     else:
-        flags = None
+        flags = 0
     try:
         spb = pattern.split('/')
         return re.sub(spb[1], spb[2], fname, flags=flags)
