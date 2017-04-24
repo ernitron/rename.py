@@ -11,13 +11,23 @@ import re
 Version = "1.1.7"
 
 # To print colored text on term
-RED   = '\033[1;31m'
-BLUE  = '\033[1;34m'
-CYAN  = '\033[1;36m'
-GREEN = '\033[0;32m'
-RESET = '\033[0;0m'
-BOLD  = '\033[;1m'
-REV   = '\033[;7m'
+RED   = ''
+BLUE  = ''
+CYAN  = ''
+GREEN = ''
+RESET = ''
+BOLD  = ''
+REV   = ''
+
+def color():
+    global RED, BLUE, CYAN, GREEN, RESET, BOLD, REV
+    RED   = '\033[1;31m'
+    BLUE  = '\033[1;34m'
+    CYAN  = '\033[1;36m'
+    GREEN = '\033[0;32m'
+    RESET = '\033[0;0m'
+    BOLD  = '\033[;1m'
+    REV   = '\033[;7m'
 
 def nocolor():
     global RED, BLUE, CYAN, GREEN, RESET, BOLD, REV
@@ -40,8 +50,9 @@ def skip_name(fname, skip):
 def start_name(fname, start, replace):
     '''Skip string in filename: returns: newname '''
     startlen = 0
-    if start and fname.startswith(start):
-        startlen = len(skip)
+    fnamelower = fname.lower()
+    if start and fnamelower.startswith(start.lower()):
+        startlen = len(start)
     return replace + fname[startlen:]
 
 def camel_case(fname):
@@ -77,9 +88,13 @@ def add_number(fname, counter, bottom):
 
 def substitute(fname, pattern, replace):
     if not pattern: return fname
+    if pattern[-1] == 'i':
+        flags = re.IGNORECASE
+    else:
+        flags = None
     try:
         spb = pattern.split('/')
-        return re.sub(spb[1], spb[2], fname)
+        return re.sub(spb[1], spb[2], fname, flags=flags)
     except:
         pass
     return re.sub(pattern, replace, fname)
@@ -87,11 +102,14 @@ def substitute(fname, pattern, replace):
 def timestamp_name(fname, newname, bottom):
     from time import localtime, strftime
     filestat = os.stat(fname)
-    timestring = strftime("%Y-%m-%d-%H:%M:%S", localtime(filestat.st_mtime))
+    timestring = strftime("%Y-%m-%d", localtime(filestat.st_mtime))
     if bottom:
         return f'{newname}-{timestring}'
     else:
         return f'{timestring}-{newname}'
+
+def strip_name(fname):
+    return fname.strip(' _\t\n\r')
 
 def renaming(a):
     '''The loop on current dir to rename files based on requests'''
@@ -137,6 +155,8 @@ def renaming(a):
         if a.number:
             newname = add_number(newname, counter, a.bottom)
             counter += 1
+        if a.strip:
+            newname = strip_name(newname)
 
         # Finally do the rename on file or directory
         newname = newname + extension
@@ -146,8 +166,9 @@ def do_rename(oldname, newname, force, yes, verbose):
     if verbose:
         print('File to be renamed\t=>', CYAN, oldname, RESET)
 
-    if oldname == newname or not newname:
-        print('Nothing to do for\t=>', RED, oldname, RESET)
+    if not newname or oldname == newname:
+        if verbose:
+            print('Nothing to do for\t=>', RED, oldname, RESET)
         return
 
     if not yes:
@@ -155,6 +176,9 @@ def do_rename(oldname, newname, force, yes, verbose):
        
     print('THIS FILE         \t=>', CYAN, oldname, RESET)
     if newname and force and yes:
+        if os.path.isfile(newname):
+            print('FILE EXISTS NO RENAME\t=>', GREEN, newname, RESET)
+            return
         try:
             os.rename(oldname, newname)
             print('HAS BEEN RENAMED TO\t=>', GREEN, newname, RESET)
@@ -184,7 +208,7 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--space', help='Replace space with _', nargs='?', const='_')
     parser.add_argument('-c', '--contains', help='check for string in filename; works with -r')
     parser.add_argument('-p', '--pattern', help='pattern with regex')
-    parser.add_argument('-r', '--replace', help='replace for match string; works with -c and -p', default='')
+    parser.add_argument('-r', '--replace', help='replace string; works with -c and -p', default='')
     parser.add_argument('-k', '--skip', help='skip this number of char from filename')
     parser.add_argument('-s', '--start', help='delete string from beginning of filename')
     parser.add_argument('-n', '--number', help='Add a 2 digit sequence start of filename', nargs='?', const='1')
@@ -201,9 +225,10 @@ if __name__ == '__main__':
     parser.add_argument('-U', '--upper', action='store_true', help='Transform filename into upper case')
     parser.add_argument('-R', '--recursive', action='store_true', help='Recursive into subdirs')
     parser.add_argument('-V', '--version', action='store_true', help='Print version and die')
-    parser.add_argument('-O', '--nocolor', action='store_true', help='Print without color')
-    parser.add_argument('-Y', '--yes', action='store_false', help='Confirm before rename [y/n]')
+    parser.add_argument('-O', '--color', action='store_true', help='Print color')
+    parser.add_argument('-S', '--strip', action='store_false', help='Dont strip blank end or bottom')
     parser.add_argument('-T', '--timestamp', action='store_true', help='add timestamp of access time')
+    parser.add_argument('-Y', '--yes', action='store_false', help='Confirm before rename [y/n]')
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
 
     # get args
@@ -219,8 +244,11 @@ if __name__ == '__main__':
         print("Version ", Version)
         sys.exit(0)
 
+    if args.color:
+        color()
+
     # If it is piped to other program (i.e. rename.py... | less) than don't color print!
-    if not os.isatty(1) or args.nocolor:
+    if not os.isatty(1):
         nocolor()
 
     # Where to start, what to get

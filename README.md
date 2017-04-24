@@ -7,9 +7,9 @@ Software: works with python 3 (but I guess with 2.7 is ok)
 
 # USAGE
     usage: rename.py [-h] [--root ROOT] [-a [SPACE]] [-c CONTAINS] [-p PATTERN]
-                 [-r REPLACE] [-k SKIP] [-s START] [-n [NUMBER]] [-m MATCH]
-                 [-x SUFFIX] [-f] [-B] [-C] [-D] [-F] [-L] [-E] [-U] [-R] [-V]
-                 [-O] [-Y] [-T] [-v]
+                     [-r REPLACE] [-k SKIP] [-s START] [-n [NUMBER]] [-m MATCH]
+                     [-x SUFFIX] [-f] [-B] [-C] [-D] [-F] [-L] [-E] [-U] [-R] [-V]
+                     [-O] [-S] [-T] [-Y] [-v]
 
 rename files
 
@@ -23,7 +23,7 @@ rename files
       -p PATTERN, --pattern PATTERN
                             pattern with regex
       -r REPLACE, --replace REPLACE
-                            replace for match string; works with -c and -p
+                            replace string; works with -c and -p
       -k SKIP, --skip SKIP  skip this number of char from filename
       -s START, --start START
                             delete string from beginning of filename
@@ -43,9 +43,10 @@ rename files
       -U, --upper           Transform filename into upper case
       -R, --recursive       Recursive into subdirs
       -V, --version         Print version and die
-      -O, --nocolor         Print without color
-      -Y, --yes             Confirm before rename [y/n]
+      -O, --color           Print color
+      -S, --strip           Dont strip blank end or bottom
       -T, --timestamp       add timestamp of access time
+      -Y, --yes             Confirm before rename [y/n]
       -v, --verbose         verbose output
 
             Examples:
@@ -56,7 +57,7 @@ rename files
             rename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
             rename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
             would do the same
- 
+     
 The Pattern and Sub can be REGULAR Expression as they will be feeded into python re.sub(pattern, sub, string)
 Besides, pattern can be in the form of:
 
