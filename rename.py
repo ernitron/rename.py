@@ -109,7 +109,7 @@ def timestamp_name(fname, newname, bottom):
         return f'{timestring}-{newname}'
 
 def strip_name(fname):
-    return fname.strip(' _\t\n\r')
+    return fname.strip(' _-\t\n\r')
 
 def renaming(a):
     '''The loop on current dir to rename files based on requests'''
