@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 # File: rename.py
 # Author: ernitron (c) 2017
@@ -58,8 +58,18 @@ def start_name(fname, start, replace):
 def camel_case(fname):
     '''Convert to CamelCase: returns newname'''
     tmpname = fname.replace('_', ' ')
+
+    prec = ''
+    newword = ''
+    for word in tmpname:
+        if prec.islower() and word.isupper() :
+            newword += ' '
+        newword += word
+        prec = word
+    tmpname = newword
+
     modified_name = re.findall('[\w]+', tmpname.lower())
-    return ''.join([word.title() for word in modified_name])
+    return ''.join([word.title() + ' ' for word in modified_name])
 
 def replace_space(fname, fill_char='_'):
     '''Replace spaces with fill_char: fill_char: default to '_' :returns newname '''
@@ -109,7 +119,13 @@ def timestamp_name(fname, newname, bottom):
         return f'{timestring}-{newname}'
 
 def strip_name(fname):
-    return fname.strip(' _\t\n\r')
+    return fname.strip(' -._\t\n\r')
+
+def sanitize_name(fname):
+    sanitize = """[]()%@"!#$^&*'"""
+    for char in sanitize:
+        fname = fname.replace(char,"")
+    return strip_name(fname)
 
 def renaming(a):
     '''The loop on current dir to rename files based on requests'''
@@ -123,9 +139,9 @@ def renaming(a):
         newname, extension = os.path.splitext(filename)
         if a.extlower:
             extension = extension.lower()
-        if a.directory and not os.path.isdir(filename): 
+        if a.directory and not os.path.isdir(filename):
             continue
-        if a.regular and not os.path.isfile(filename): 
+        if a.regular and not os.path.isfile(filename):
             continue
         if a.match and not re.match(a.match, filename):
             continue
@@ -150,6 +166,8 @@ def renaming(a):
             newname = lower_case(newname)
         if a.space:
             newname = replace_space(newname, fill_char=a.space)
+        if a.sanitize:
+            newname = sanitize_name(newname)
         if a.timestamp:
             newname = timestamp_name(filename, newname, a.bottom)
         if a.number:
@@ -161,6 +179,10 @@ def renaming(a):
            extension = a.extension
 
         # Finally do the rename on file or directory
+        if not newname:
+            newname = 'ZZZ-TO-BE-REDEFINED'
+            newname = timestamp_name(filename, newname, True)
+
         newname = newname + extension
         do_rename(filename, newname, a.force, a.yes, a.verbose)
 
@@ -174,21 +196,23 @@ def do_rename(oldname, newname, force, yes, verbose):
         return
 
     if not yes:
-       yes = (input(f'Rename to "{newname}" ? [y/n]') == 'y')
-       
-    print('THIS FILE         \t=>', CYAN, oldname, RESET)
+       yes = (input(f'Rename {oldname} to "{newname}" ? [y/n] ') == 'y')
+
+    print('THIS FILE         \t=>', GREEN, oldname, RESET)
     if newname and force and yes:
         if os.path.isfile(newname):
-            print('FILE EXISTS NO RENAME\t=>', GREEN, newname, RESET)
+            print('FILE EXISTS NO RENAME\t=>', RED, newname, RESET)
             return
+
+
         try:
             os.rename(oldname, newname)
             print('HAS BEEN RENAMED TO\t=>', GREEN, newname, RESET)
-            
+
         except:
             print('Cannot rename ', RED, oldname, RESET)
     else:
-        print('WILL BE RENAMED TO\t=>', GREEN, newname, RESET)
+        print('WILL BE RENAMED TO\t=>', CYAN, newname, RESET)
 
 if __name__ == '__main__':
     import argparse
@@ -231,13 +255,14 @@ if __name__ == '__main__':
     parser.add_argument('-O', '--color', action='store_true', help='Print color')
     parser.add_argument('-S', '--strip', action='store_false', help='Dont strip blank end or bottom')
     parser.add_argument('-T', '--timestamp', action='store_true', help='add timestamp of access time')
+    parser.add_argument('-Z', '--sanitize', action='store_true', help='sanitize name from !@#$%[)')
     parser.add_argument('-Y', '--yes', action='store_false', help='Confirm before rename [y/n]')
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
 
     # get args
     args = parser.parse_args()
 
-    if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.extlower, args.extension, args.verbose]):
+    if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.extlower, args.extension, args.sanitize, args.verbose]):
         print("Version ", Version)
         parser.print_help()
         print("Sorry but I have nothing to do, did you try with some flags?\n\n")
