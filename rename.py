@@ -119,6 +119,7 @@ def timestamp_name(fname, newname, bottom):
         return f'{timestring}-{newname}'
 
 def strip_name(fname):
+<<<<<<< HEAD
     return fname.strip(' -._\t\n\r')
 
 def sanitize_name(fname):
