@@ -8,7 +8,7 @@ import os
 import sys
 import re
 
-Version = "1.1.7"
+Version = "1.2.7"
 
 # To print colored text on term
 RED   = ''
@@ -55,17 +55,31 @@ def start_name(fname, start, replace):
         startlen = len(start)
     return replace + fname[startlen:]
 
+def space_case(fname):
+    '''Convert to Name Surname: returns newname'''
+    prec = ''
+    newname = ''
+    for char in fname:
+        if char == '_':
+            newname += ' '
+            continue
+        if prec.islower() and char.isupper() :
+            newname += ' '
+        newname += char
+        prec = char
+    return newname
+
 def camel_case(fname):
     '''Convert to CamelCase: returns newname'''
     tmpname = fname.replace('_', ' ')
 
     prec = ''
     newword = ''
-    for word in tmpname:
-        if prec.islower() and word.isupper() :
+    for char in tmpname:
+        if prec.islower() and char.isupper() :
             newword += ' '
-        newword += word
-        prec = word
+        newword += char
+        prec = char
     tmpname = newword
 
     modified_name = re.findall('[\w]+', tmpname.lower())
@@ -119,7 +133,6 @@ def timestamp_name(fname, newname, bottom):
         return f'{timestring}-{newname}'
 
 def strip_name(fname):
-<<<<<<< HEAD
     return fname.strip(' -._\t\n\r')
 
 def sanitize_name(fname):
@@ -128,7 +141,7 @@ def sanitize_name(fname):
         fname = fname.replace(char,"")
     return strip_name(fname)
 
-def renaming(a):
+def bulk_rename(a):
     '''The loop on current dir to rename files based on requests'''
     # initialize counter
     try:
@@ -136,7 +149,13 @@ def renaming(a):
     except:
         counter = 1
 
-    for filename in os.listdir():
+    if a.files:
+        filelist = a.files
+    else:
+        filelist = os.listdir()
+
+    for filename in filelist:
+
         newname, extension = os.path.splitext(filename)
         if a.extlower:
             extension = extension.lower()
@@ -181,7 +200,7 @@ def renaming(a):
 
         # Finally do the rename on file or directory
         if not newname:
-            newname = 'ZZZ-TO-BE-REDEFINED'
+            newname = 'ZZZ-TBD'
             newname = timestamp_name(filename, newname, True)
 
         newname = newname + extension
@@ -242,12 +261,13 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--match', help='apply only to file that match pattern')
     parser.add_argument('-x', '--suffix', help='apply only to file with suffix like .mp3')
     parser.add_argument('-e', '--extension', help='change extension .mp3')
+    parser.add_argument('-f', '--files', help='apply to list of files', nargs='*')
     # Bool
-    parser.add_argument('-f', '--force', action='store_true', help='Force to rename (do it!)', default=False)
+    parser.add_argument('-F', '--force', action='store_true', help='Force to rename (do it!)', default=False)
     parser.add_argument('-B', '--bottom', action='store_true', help='put sequence at end')
     parser.add_argument('-C', '--camel', action='store_true', help='Transform filename in CamelCase')
     parser.add_argument('-D', '--directory', action='store_true', help='Apply only to directory')
-    parser.add_argument('-F', '--regular', action='store_true', help='Apply only to regular files')
+    parser.add_argument('-G', '--regular', action='store_true', help='Apply only to regular files')
     parser.add_argument('-L', '--lower', action='store_true', help='Transform filename into lower case')
     parser.add_argument('-E', '--extlower', action='store_true', help='Transform extension into lower case')
     parser.add_argument('-U', '--upper', action='store_true', help='Transform filename into upper case')
@@ -256,21 +276,21 @@ if __name__ == '__main__':
     parser.add_argument('-O', '--color', action='store_true', help='Print color')
     parser.add_argument('-S', '--strip', action='store_false', help='Dont strip blank end or bottom')
     parser.add_argument('-T', '--timestamp', action='store_true', help='add timestamp of access time')
-    parser.add_argument('-Z', '--sanitize', action='store_true', help='sanitize name from !@#$%[)')
+    parser.add_argument('-Z', '--sanitize', action='store_true', help='sanitize name from weird chars')
     parser.add_argument('-Y', '--yes', action='store_false', help='Confirm before rename [y/n]')
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
 
     # get args
     args = parser.parse_args()
 
+    if args.version:
+        print("Version ", Version)
+        sys.exit(0)
+
     if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.extlower, args.extension, args.sanitize, args.verbose]):
         print("Version ", Version)
         parser.print_help()
         print("Sorry but I have nothing to do, did you try with some flags?\n\n")
-        sys.exit(0)
-
-    if args.version:
-        print("Version ", Version)
         sys.exit(0)
 
     if args.color:
@@ -280,14 +300,14 @@ if __name__ == '__main__':
     if not os.isatty(1):
         nocolor()
 
-    # Where to start, what to get
     os.chdir(args.root)
-
+    # Where to start, what to get
     if args.recursive:
-        for top, subdirs, files in os.walk(args.root):
+        for top, subdirs, files in os.walk(a.root):
             for d in subdirs:
                 newdir = os.path.join(top, d)
                 os.chdir(newdir)
-                renaming(args)
+                bulk_rename(a)
     else:
-        renaming(args)
+        bulk_rename(args)
+
