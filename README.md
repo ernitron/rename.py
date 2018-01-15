@@ -75,11 +75,8 @@ Easy as make install
 (will simply copy the file rename.py in /usr/local/bin)
 
 
-## Configuration
-Do we need one?
-
 ## Development
 There is plenty of space for development
 
 ## License MIT
-What other decent licenses exists?
+What other decent licenses exist?
