@@ -135,8 +135,19 @@ def timestamp_name(fname, newname, bottom):
 def strip_name(fname):
     return fname.strip(' -._\t\n\r')
 
+def swap_name(fname, swap):
+    '''Swap name like Alfa Beta Gamma -> GAMMA, Alfa, Beta'''
+    '''Swap name like Alfa Beta-> BETA, Alfa'''
+
+    parts = fname.split(swap)
+    newname = parts[-1].upper()
+    for part in parts[0:-2] :
+        part = part.strip(',')
+        newname += ', ' + part.title()
+    return newname
+
 def sanitize_name(fname):
-    sanitize = """[]()%@"!#$^&*'"""
+    sanitize = """[]()%@"!#$^&*,:;></?{}'"""
     for char in sanitize:
         fname = fname.replace(char,"")
     return strip_name(fname)
@@ -195,6 +206,8 @@ def bulk_rename(a):
             counter += 1
         if a.strip:
             newname = strip_name(newname)
+        if a.swap:
+            newname = swap_name(newname, a.swap)
         if a.extension:
            extension = a.extension
 
@@ -223,8 +236,6 @@ def do_rename(oldname, newname, force, yes, verbose):
         if os.path.isfile(newname):
             print('FILE EXISTS NO RENAME\t=>', RED, newname, RESET)
             return
-
-
         try:
             os.rename(oldname, newname)
             print('HAS BEEN RENAMED TO\t=>', GREEN, newname, RESET)
@@ -260,6 +271,7 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--number', help='Add a 2 digit sequence start of filename', nargs='?', const='1')
     parser.add_argument('-m', '--match', help='apply only to file that match pattern')
     parser.add_argument('-x', '--suffix', help='apply only to file with suffix like .mp3')
+    parser.add_argument('-w', '--swap', help='swap names Alfa Beta->Beta Alfa', default=' ')
     parser.add_argument('-e', '--extension', help='change extension .mp3')
     parser.add_argument('-f', '--files', help='apply to list of files', nargs='*')
     # Bool
@@ -287,7 +299,7 @@ if __name__ == '__main__':
         print("Version ", Version)
         sys.exit(0)
 
-    if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.extlower, args.extension, args.sanitize, args.verbose]):
+    if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.extlower, args.extension, args.sanitize, args.swap, args.verbose]):
         print("Version ", Version)
         parser.print_help()
         print("Sorry but I have nothing to do, did you try with some flags?\n\n")
