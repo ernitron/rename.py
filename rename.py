@@ -43,14 +43,14 @@ def skip_name(filename, skip='0'):
     '''-k skip: strip chars at beginning of filename'''
     try: elen = int(skip)
     except: elen = len(skip)
-    return filename[elen:]
+    return filename[elen:].strip()
 
 def ztrip_name(filename, skip=0):
     '''-z skip: strip chars at end of filename'''
     try: elen = int(skip)
     except: elen = len(skip)
     if elen < len(filename):
-        return filename[:-elen]
+        return filename[:-elen].strip()
     return filename
 
 def start_name(filename, start, replace):
@@ -59,7 +59,7 @@ def start_name(filename, start, replace):
     filenamelower = filename.lower()
     if start and filenamelower.startswith(start.lower()):
         startlen = len(start)
-    return replace + filename[startlen:]
+    return replace + filename[startlen:].strip()
 
 def remove_underscore(filename):
     filename = filename.replace('_', ' ')
@@ -237,7 +237,7 @@ def bulk_rename(a):
         if a.hash:
             newname = hash_name(newname)
         if a.extension:
-           extension = a.extension
+            extension = a.extension
 
         # Finally do the rename on file or directory
         if not newname:
@@ -327,7 +327,7 @@ if __name__ == '__main__':
     parser.add_argument('-T', '--title', action='store_true', help='Transform into Title case ')
     parser.add_argument('-V', '--version', action='store_true', help='Print version and die')
     parser.add_argument('-O', '--color', action='store_true', help='Print messages in color')
-    parser.add_argument('-S', '--strip', action='store_false', help='Strip blank|tab at end or bottom')
+    parser.add_argument('-S', '--strip', action='store_true', help='Strip blank|tab at end or bottom')
     parser.add_argument('-P', '--timestamp', action='store_true', help='Add timestamp of access time')
     parser.add_argument('-Z', '--sanitize', action='store_true', help='Sanitize name from weird chars')
     parser.add_argument('-H', '--hash', action='store_true', help='hash 256')
@@ -340,7 +340,7 @@ if __name__ == '__main__':
         print("Version ", Version)
         sys.exit(0)
 
-    if any([args.help, args.version]):
+    if any([args.version]):
         print("Version ", Version)
         parser.print_help()
         sys.exit(0)
