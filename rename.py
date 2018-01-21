@@ -39,30 +39,41 @@ def nocolor():
     BOLD  = ''
     REV   = ''
 
-def skip_name(filename, skip):
-    '''Skip first chars in filename: returns: newname '''
+def skip_name(filename, skip='0'):
+    '''-k skip: strip chars at beginning of filename'''
     try: elen = int(skip)
-    except: elen = 0
+    except: elen = len(skip)
     return filename[elen:]
 
-def ztrip_name(filename, skip):
-    '''Strip chars in filename: returns: newname '''
+def ztrip_name(filename, skip=0):
+    '''-z skip: strip chars at end of filename'''
     try: elen = int(skip)
-    except: elen = 0
+    except: elen = len(skip)
     if elen < len(filename):
         return filename[:-elen]
     return filename
 
 def start_name(filename, start, replace):
-    '''Skip string in filename: returns: newname '''
+    '''strip and replace string in filename'''
     startlen = 0
     filenamelower = filename.lower()
     if start and filenamelower.startswith(start.lower()):
         startlen = len(start)
     return replace + filename[startlen:]
 
+def remove_underscore(filename):
+    filename = filename.replace('_', ' ')
+    return filename.replace('-', ' ')
+
+def replace_space(filename, fill_char='_'):
+    '''Replace spaces with fill_char (default to '_') '''
+    return filename.replace(' ', fill_char)
+
+def strip_name(filename):
+    return filename.strip(' -._\t\n\r')
+
 def space_case(filename):
-    '''Convert to Name Surname: returns newname'''
+    '''Convert to Title Case inserting spaces where underscore'''
     prec = ''
     newname = ''
     for char in filename:
@@ -74,10 +85,6 @@ def space_case(filename):
         newname += char
         prec = char
     return newname
-
-def remove_underscore(filename):
-    filename = filename.replace('_', ' ')
-    return filename.replace('-', ' ')
 
 def camel_case(filename):
     '''Convert to CamelCase: from camel_case returns Camel Case'''
@@ -94,10 +101,6 @@ def camel_case(filename):
 
     modified_name = re.findall('[\w]+', tmpname.lower())
     return ''.join([word.title() + ' ' for word in modified_name])
-
-def replace_space(filename, fill_char='_'):
-    '''Replace spaces with fill_char: fill_char: default to '_' :returns newname '''
-    return filename.replace(' ', fill_char)
 
 def replace_content(filename, contains, replace):
     '''Replace content with replace string :returns newname '''
@@ -145,9 +148,6 @@ def timestamp_name(filename, newname, bottom):
         return f'{newname}-{timestring}'
     else:
         return f'{timestring}-{newname}'
-
-def strip_name(filename):
-    return filename.strip(' -._\t\n\r')
 
 def swap_name(filename, swap):
     '''Swap name like Alfa Beta Gamma -> GAMMA, Alfa, Beta'''
