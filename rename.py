@@ -167,10 +167,16 @@ def sanitize_name(filename):
         filename = filename.replace(char, '')
     return strip_name(filename)
 
-def hash_name(filename):
+def hash_name(filename, hash='sha256'):
     import hashlib
+    try:
+        h = hashlib.new(hash)
+    except:
+        print (hashlib.algorithms_available)
+        sys.exit(0)
     filename = filename.encode('ascii', 'ignore')
-    return hashlib.sha256(filename).hexdigest()
+    h.update(filename)
+    return h.hexdigest()
 
 def bulk_rename(a):
     '''The loop on current dir to rename files based on requests'''
@@ -235,33 +241,33 @@ def bulk_rename(a):
         if a.swap:
             newname = swap_name(newname, a.swap)
         if a.hash:
-            newname = hash_name(newname)
+            newname = hash_name(newname, a.hash)
         if a.extension:
             extension = a.extension
 
         # Finally do the rename on file or directory
         if not newname:
-            newname = 'ZZZ-TBD'
-            newname = timestamp_name(filename, newname, True)
+            newname = timestamp_name(filename, 'ZZZZ-ToBeDefined', True)
 
         newname = newname + extension
         do_rename(filename, newname, a.force, a.yes, a.verbose)
 
-def do_rename(oldname, newname, force, yes, verbose):
-    if verbose:
-        print('File to be renamed\t=>', CYAN, oldname, RESET)
+def do_rename(filename, newname, force, yes, verbose):
 
-    if not newname or oldname == newname:
+    if not newname or filename == newname:
         if verbose:
-            print('Nothing to do for\t=>', RED, oldname, RESET)
+            print('Nothing to do for\t=>', RED, filename, RESET)
         return
 
+    if verbose:
+        print('File to be renamed\t=>', CYAN, filename, RESET)
+
     if not yes:
-       answer = input(f'Rename {oldname} to "{newname}" ? [y/n] ')
+       answer = input(f'Rename {filename} to "{newname}" ? [y/n] ')
        yes = answer.lower() == 'y'
        if not yes: return
 
-    print('THIS FILE         \t=>', GREEN, oldname, RESET)
+    print('THIS FILE         \t=>', GREEN, filename, RESET)
     if newname and yes and force:
         if os.path.isfile(newname):
             print('FILE EXISTS \t=>', RED, newname, RESET)
@@ -270,13 +276,13 @@ def do_rename(oldname, newname, force, yes, verbose):
                return
         try:
             # Preserve creation and access time is default
-            stat = os.stat(oldname)
-            os.rename(oldname, newname)
+            stat = os.stat(filename)
+            os.rename(filename, newname)
             os.utime(newname, (stat.st_atime, stat.st_mtime))
             print('HAS BEEN RENAMED TO\t=>', GREEN, newname, RESET)
 
         except:
-            print('Cannot rename ', RED, oldname, RESET)
+            print('Cannot rename ', RED, filename, RESET)
     else:
         print('WILL BE RENAMED TO\t=>', CYAN, newname, RESET)
 
@@ -330,7 +336,7 @@ if __name__ == '__main__':
     parser.add_argument('-S', '--strip', action='store_true', help='Strip blank|tab at end or bottom')
     parser.add_argument('-P', '--timestamp', action='store_true', help='Add timestamp of access time')
     parser.add_argument('-Z', '--sanitize', action='store_true', help='Sanitize name from weird chars')
-    parser.add_argument('-H', '--hash', action='store_true', help='hash 256')
+    parser.add_argument('-H', '--hash', help='filename is hash', nargs='?', const='sha256')
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
 
     # get args
@@ -338,11 +344,6 @@ if __name__ == '__main__':
 
     if args.version:
         print("Version ", Version)
-        sys.exit(0)
-
-    if any([args.version]):
-        print("Version ", Version)
-        parser.print_help()
         sys.exit(0)
 
     if args.color:
