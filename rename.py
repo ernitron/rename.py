@@ -8,7 +8,7 @@ import os
 import sys
 import re
 
-Version = "1.2.7"
+Version = "1.2.9"
 
 # To print colored text on term
 RED   = ''
@@ -39,27 +39,33 @@ def nocolor():
     BOLD  = ''
     REV   = ''
 
-def skip_name(fname, skip):
+def skip_name(filename, skip):
     '''Skip first chars in filename: returns: newname '''
-    try:
-        startlen = int(skip)
-    except:
-        startlen = 0
-    return fname[startlen:]
+    try: elen = int(skip)
+    except: elen = 0
+    return filename[elen:]
 
-def start_name(fname, start, replace):
+def ztrip_name(filename, skip):
+    '''Strip chars in filename: returns: newname '''
+    try: elen = int(skip)
+    except: elen = 0
+    if elen < len(filename):
+        return filename[:-elen]
+    return filename
+
+def start_name(filename, start, replace):
     '''Skip string in filename: returns: newname '''
     startlen = 0
-    fnamelower = fname.lower()
-    if start and fnamelower.startswith(start.lower()):
+    filenamelower = filename.lower()
+    if start and filenamelower.startswith(start.lower()):
         startlen = len(start)
-    return replace + fname[startlen:]
+    return replace + filename[startlen:]
 
-def space_case(fname):
+def space_case(filename):
     '''Convert to Name Surname: returns newname'''
     prec = ''
     newname = ''
-    for char in fname:
+    for char in filename:
         if char == '_':
             newname += ' '
             continue
@@ -69,9 +75,13 @@ def space_case(fname):
         prec = char
     return newname
 
-def camel_case(fname):
-    '''Convert to CamelCase: returns newname'''
-    tmpname = fname.replace('_', ' ')
+def remove_underscore(filename):
+    filename = filename.replace('_', ' ')
+    return filename.replace('-', ' ')
+
+def camel_case(filename):
+    '''Convert to CamelCase: from camel_case returns Camel Case'''
+    tmpname = filename.replace('_', ' ')
 
     prec = ''
     newword = ''
@@ -85,72 +95,82 @@ def camel_case(fname):
     modified_name = re.findall('[\w]+', tmpname.lower())
     return ''.join([word.title() + ' ' for word in modified_name])
 
-def replace_space(fname, fill_char='_'):
+def replace_space(filename, fill_char='_'):
     '''Replace spaces with fill_char: fill_char: default to '_' :returns newname '''
-    return fname.replace(' ', fill_char)
+    return filename.replace(' ', fill_char)
 
-def replace_content(fname, contains, replace):
+def replace_content(filename, contains, replace):
     '''Replace content with replace string :returns newname '''
-    if contains and contains in fname:
-        return fname.replace(contains, replace)
-    else: return fname
+    if contains and contains in filename:
+        return filename.replace(contains, replace)
+    else: return filename
 
-def lower_case(fname):
-    '''Lower filename :returns newname'''
-    return fname.lower()
+def lower_case(filename):
+    '''Lower filename: from NEWNAME returns newname'''
+    return filename.lower()
 
-def upper_case(fname):
-    '''Upper filename :returns newname'''
-    return fname.upper()
+def upper_case(filename):
+    '''Upper filename: from newname returns NEWNAME'''
+    return filename.upper()
 
-def add_number(fname, counter, bottom):
+def title_case(filename):
+    '''Upper filename: from newname returns Newname'''
+    return filename.title()
+
+def add_number(filename, counter, bottom):
     '''Add a sequence 2digit at beginning of filename :returns newname '''
     if bottom:
-        return '%s-%02d' % (fname, counter)
+        return '%s-%02d' % (filename, counter)
     else:
-        return '%02d-%s' % (counter, fname)
+        return '%02d-%s' % (counter, filename)
 
-def substitute(fname, pattern, replace):
-    if not pattern: return fname
+def substitute(filename, pattern, replace):
+    if not pattern: return filename
     if pattern[-1] == 'i':
         flags = re.IGNORECASE
     else:
         flags = 0
     try:
         spb = pattern.split('/')
-        return re.sub(spb[1], spb[2], fname, flags=flags)
+        return re.sub(spb[1], spb[2], filename, flags=flags)
     except:
         pass
-    return re.sub(pattern, replace, fname)
+    return re.sub(pattern, replace, filename)
 
-def timestamp_name(fname, newname, bottom):
+def timestamp_name(filename, newname, bottom):
     from time import localtime, strftime
-    filestat = os.stat(fname)
+    filestat = os.stat(filename)
     timestring = strftime("%Y-%m-%d", localtime(filestat.st_mtime))
     if bottom:
         return f'{newname}-{timestring}'
     else:
         return f'{timestring}-{newname}'
 
-def strip_name(fname):
-    return fname.strip(' -._\t\n\r')
+def strip_name(filename):
+    return filename.strip(' -._\t\n\r')
 
-def swap_name(fname, swap):
+def swap_name(filename, swap):
     '''Swap name like Alfa Beta Gamma -> GAMMA, Alfa, Beta'''
     '''Swap name like Alfa Beta-> BETA, Alfa'''
-
-    parts = fname.split(swap)
-    newname = parts[-1].upper()
-    for part in parts[0:-2] :
+    parts = filename.split(swap)
+    newname = parts[-1].upper() + ','
+    for part in parts[0:-1] :
         part = part.strip(',')
-        newname += ', ' + part.title()
+        newname += ' ' + part.title()
+    newname = newname.strip(',')
+    newname = newname.strip()
     return newname
 
-def sanitize_name(fname):
+def sanitize_name(filename):
     sanitize = """[]()%@"!#$^&*,:;></?{}'"""
     for char in sanitize:
-        fname = fname.replace(char,"")
-    return strip_name(fname)
+        filename = filename.replace(char, '')
+    return strip_name(filename)
+
+def hash_name(filename):
+    import hashlib
+    filename = filename.encode('ascii', 'ignore')
+    return hashlib.sha256(filename).hexdigest()
 
 def bulk_rename(a):
     '''The loop on current dir to rename files based on requests'''
@@ -195,6 +215,8 @@ def bulk_rename(a):
             newname = upper_case(newname)
         if a.lower:
             newname = lower_case(newname)
+        if a.title:
+            newname = title_case(newname)
         if a.space:
             newname = replace_space(newname, fill_char=a.space)
         if a.sanitize:
@@ -206,8 +228,14 @@ def bulk_rename(a):
             counter += 1
         if a.strip:
             newname = strip_name(newname)
+        if a.ztrip:
+            newname = ztrip_name(newname, a.ztrip)
+        if a.under:
+            newname = remove_underscore(newname)
         if a.swap:
             newname = swap_name(newname, a.swap)
+        if a.hash:
+            newname = hash_name(newname)
         if a.extension:
            extension = a.extension
 
@@ -229,15 +257,22 @@ def do_rename(oldname, newname, force, yes, verbose):
         return
 
     if not yes:
-       yes = (input(f'Rename {oldname} to "{newname}" ? [y/n] ') == 'y')
+       answer = input(f'Rename {oldname} to "{newname}" ? [y/n] ')
+       yes = answer.lower() == 'y'
+       if not yes: return
 
     print('THIS FILE         \t=>', GREEN, oldname, RESET)
-    if newname and force and yes:
+    if newname and yes and force:
         if os.path.isfile(newname):
-            print('FILE EXISTS NO RENAME\t=>', RED, newname, RESET)
-            return
+            print('FILE EXISTS \t=>', RED, newname, RESET)
+            if not force:
+               print('CANT RENAME\t=>', RED, newname, RESET)
+               return
         try:
+            # Preserve creation and access time is default
+            stat = os.stat(oldname)
             os.rename(oldname, newname)
+            os.utime(newname, (stat.st_atime, stat.st_mtime))
             print('HAS BEEN RENAMED TO\t=>', GREEN, newname, RESET)
 
         except:
@@ -261,21 +296,24 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='rename files', epilog=example_text,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument('--root', help='this will be the root directory', default='./')
     parser.add_argument('-a', '--space', help='Replace space with _', nargs='?', const='_')
     parser.add_argument('-c', '--contains', help='check for string in filename; works with -r')
+    parser.add_argument('-e', '--extension', help='change extension example to .mp3')
     parser.add_argument('-p', '--pattern', help='pattern with regex')
     parser.add_argument('-r', '--replace', help='replace string; works with -c and -p', default='')
-    parser.add_argument('-k', '--skip', help='skip this number of char from filename')
     parser.add_argument('-s', '--start', help='delete string from beginning of filename')
+    parser.add_argument('-k', '--skip', help='skip n char from start of filename')
+    parser.add_argument('-z', '--ztrip', help='delete n chars from end of filename')
     parser.add_argument('-n', '--number', help='Add a 2 digit sequence start of filename', nargs='?', const='1')
+    parser.add_argument('-w', '--swap', help='swap names Alfa Beta->Beta Alfa', nargs='?', const=' ')
+    # Applicability
+    parser.add_argument('--root', help='this will be the root directory', default='./')
     parser.add_argument('-m', '--match', help='apply only to file that match pattern')
     parser.add_argument('-x', '--suffix', help='apply only to file with suffix like .mp3')
-    parser.add_argument('-w', '--swap', help='swap names Alfa Beta->Beta Alfa', default=' ')
-    parser.add_argument('-e', '--extension', help='change extension .mp3')
     parser.add_argument('-f', '--files', help='apply to list of files', nargs='*')
     # Bool
     parser.add_argument('-F', '--force', action='store_true', help='Force to rename (do it!)', default=False)
+    parser.add_argument('-_', '--under', action='store_true', help='Force to rename (do it!)', default=False)
     parser.add_argument('-B', '--bottom', action='store_true', help='put sequence at end')
     parser.add_argument('-C', '--camel', action='store_true', help='Transform filename in CamelCase')
     parser.add_argument('-D', '--directory', action='store_true', help='Apply only to directory')
@@ -283,13 +321,15 @@ if __name__ == '__main__':
     parser.add_argument('-L', '--lower', action='store_true', help='Transform filename into lower case')
     parser.add_argument('-E', '--extlower', action='store_true', help='Transform extension into lower case')
     parser.add_argument('-U', '--upper', action='store_true', help='Transform filename into upper case')
+    parser.add_argument('-T', '--title', action='store_true', help='Transform into Title case ')
     parser.add_argument('-R', '--recursive', action='store_true', help='Recursive into subdirs')
     parser.add_argument('-V', '--version', action='store_true', help='Print version and die')
     parser.add_argument('-O', '--color', action='store_true', help='Print color')
-    parser.add_argument('-S', '--strip', action='store_false', help='Dont strip blank end or bottom')
-    parser.add_argument('-T', '--timestamp', action='store_true', help='add timestamp of access time')
+    parser.add_argument('-S', '--strip', action='store_false', help='Strip blank|tab at end or bottom')
+    parser.add_argument('-P', '--timestamp', action='store_true', help='add timestamp of access time')
     parser.add_argument('-Z', '--sanitize', action='store_true', help='sanitize name from weird chars')
     parser.add_argument('-Y', '--yes', action='store_false', help='Confirm before rename [y/n]')
+    parser.add_argument('-H', '--hash', action='store_true', help='hash 256')
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
 
     # get args
@@ -299,7 +339,7 @@ if __name__ == '__main__':
         print("Version ", Version)
         sys.exit(0)
 
-    if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.camel, args.number, args.extlower, args.extension, args.sanitize, args.swap, args.verbose]):
+    if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.title, args.camel, args.number, args.extlower, args.extension, args.sanitize, args.swap, args.ztrip, args.hash, args.under, args.verbose]):
         print("Version ", Version)
         parser.print_help()
         print("Sorry but I have nothing to do, did you try with some flags?\n\n")
