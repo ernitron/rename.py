@@ -283,14 +283,15 @@ def do_rename(oldname, newname, force, yes, verbose):
 if __name__ == '__main__':
     import argparse
 
-    example_text = '''\tExamples:
-\trename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
-\twould rename a file like: start_of_file1234_Take_This.mp3
-                     into: 01-Take_That.mp3
+    example_text = '''
+    Examples:
+    # rename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
+    would rename a file like: start_of_file1234_Take_This.mp3
+                 into: 01-Take_That.mp3
 
-\trename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
-\trename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
-\twould do the same
+    # rename.py -s start_of_file -k 5 -p '/This/That/' -n -x mp3 -F
+    # rename.py -k start_of_file1234_ -p This -r That -n -x mp3 -F
+    would do the same
  '''
 
     parser = argparse.ArgumentParser(description='rename files', epilog=example_text,
@@ -298,12 +299,12 @@ if __name__ == '__main__':
 
     parser.add_argument('-a', '--space', help='Replace space with _', nargs='?', const='_')
     parser.add_argument('-c', '--contains', help='check for string in filename; works with -r')
-    parser.add_argument('-e', '--extension', help='change extension example to .mp3')
     parser.add_argument('-p', '--pattern', help='pattern with regex')
     parser.add_argument('-r', '--replace', help='replace string; works with -c and -p', default='')
     parser.add_argument('-s', '--start', help='delete string from beginning of filename')
-    parser.add_argument('-k', '--skip', help='skip n char from start of filename')
     parser.add_argument('-z', '--ztrip', help='delete n chars from end of filename')
+    parser.add_argument('-k', '--skip', help='skip n char from start of filename')
+    parser.add_argument('-e', '--extension', help='change extension example to .mp3')
     parser.add_argument('-n', '--number', help='Add a 2 digit sequence start of filename', nargs='?', const='1')
     parser.add_argument('-w', '--swap', help='swap names Alfa Beta->Beta Alfa', nargs='?', const=' ')
     # Applicability
@@ -311,24 +312,24 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--match', help='apply only to file that match pattern')
     parser.add_argument('-x', '--suffix', help='apply only to file with suffix like .mp3')
     parser.add_argument('-f', '--files', help='apply to list of files', nargs='*')
-    # Bool
-    parser.add_argument('-F', '--force', action='store_true', help='Force to rename (do it!)', default=False)
-    parser.add_argument('-_', '--under', action='store_true', help='Force to rename (do it!)', default=False)
-    parser.add_argument('-B', '--bottom', action='store_true', help='put sequence at end')
-    parser.add_argument('-C', '--camel', action='store_true', help='Transform filename in CamelCase')
     parser.add_argument('-D', '--directory', action='store_true', help='Apply only to directory')
     parser.add_argument('-G', '--regular', action='store_true', help='Apply only to regular files')
+    parser.add_argument('-R', '--recursive', action='store_true', help='Recursive into subdirs')
+    parser.add_argument('-Y', '--yes', action='store_false', help='Confirm before rename [y/n]')
+    parser.add_argument('-F', '--force', action='store_true', help='Force to rename (do it!)', default=False)
+    # Other Boolean Flags
+    parser.add_argument('-_', '--under', action='store_true', help='Remove underscores and minuses', default=False)
+    parser.add_argument('-B', '--bottom', action='store_true', help='Put number sequence at end')
+    parser.add_argument('-C', '--camel', action='store_true', help='Transform filename in CamelCase')
     parser.add_argument('-L', '--lower', action='store_true', help='Transform filename into lower case')
     parser.add_argument('-E', '--extlower', action='store_true', help='Transform extension into lower case')
     parser.add_argument('-U', '--upper', action='store_true', help='Transform filename into upper case')
     parser.add_argument('-T', '--title', action='store_true', help='Transform into Title case ')
-    parser.add_argument('-R', '--recursive', action='store_true', help='Recursive into subdirs')
     parser.add_argument('-V', '--version', action='store_true', help='Print version and die')
-    parser.add_argument('-O', '--color', action='store_true', help='Print color')
+    parser.add_argument('-O', '--color', action='store_true', help='Print messages in color')
     parser.add_argument('-S', '--strip', action='store_false', help='Strip blank|tab at end or bottom')
-    parser.add_argument('-P', '--timestamp', action='store_true', help='add timestamp of access time')
-    parser.add_argument('-Z', '--sanitize', action='store_true', help='sanitize name from weird chars')
-    parser.add_argument('-Y', '--yes', action='store_false', help='Confirm before rename [y/n]')
+    parser.add_argument('-P', '--timestamp', action='store_true', help='Add timestamp of access time')
+    parser.add_argument('-Z', '--sanitize', action='store_true', help='Sanitize name from weird chars')
     parser.add_argument('-H', '--hash', action='store_true', help='hash 256')
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
 
@@ -339,10 +340,9 @@ if __name__ == '__main__':
         print("Version ", Version)
         sys.exit(0)
 
-    if not any([args.start, args.skip, args.space, args.contains, args.replace, args.force, args.pattern, args.lower, args.upper, args.title, args.camel, args.number, args.extlower, args.extension, args.sanitize, args.swap, args.ztrip, args.hash, args.under, args.verbose]):
+    if any([args.help, args.version]):
         print("Version ", Version)
         parser.print_help()
-        print("Sorry but I have nothing to do, did you try with some flags?\n\n")
         sys.exit(0)
 
     if args.color:

@@ -67,19 +67,10 @@ Software: works with python 3 (but I guess with 2.7 is ok)
 	would rename a file like: start_of_file1234_Take_This.mp3
                      into: 01-Take_That.mp3
 
-	rename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
-	rename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
+	rename.py -s start_of_file -k 5 -p '/This/That/' -n -x mp3 -F
+	rename.py -k start_of_file1234_ -p This -r That -n -x mp3 -F
 	would do the same
  
-            Examples:
-            rename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
-            would rename a file like: start_of_file1234_Take_This.mp3
-                         into: 01-Take_That.mp3
-
-            rename.py -k start_of_file -p '/This/That/' -k 5 -n -x mp3 -f
-            rename.py -k start_of_file -p This -r That -k 5 -n -x mp3 -f
-            would do the same
-     
 The Pattern and Sub can be REGULAR Expression as they will be feeded into python re.sub(pattern, sub, string)
 Besides, pattern can be in the form of:
 
@@ -92,10 +83,8 @@ that will result in:
 and will work.
 
 ## Installation
-
 Easy as make install
 (will simply copy the file rename.py in /usr/local/bin)
-
 
 ## Development
 There is plenty of space for development
