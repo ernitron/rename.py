@@ -189,24 +189,27 @@ def bulk_rename(a):
     if a.files:
         filelist = a.files
     else:
-        filelist = os.listdir()
+        filelist = os.listdir('.')
 
     for filename in filelist:
-
-        newname, extension = os.path.splitext(filename)
-        if a.extlower:
-            extension = extension.lower()
+        if a.recursive and os.path.isdir(filename):
+            os.chdir(filename)
+            bulk_rename(a)
+            os.chdir('..')
         if a.directory and not os.path.isdir(filename):
             continue
         if a.regular and not os.path.isfile(filename):
             continue
         if a.match and not re.match(a.match, filename):
             continue
-        if a.suffix and not a.suffix in extension:
-            continue
         if a.contains and not a.contains in filename:
             continue
 
+        newname, extension = os.path.splitext(filename)
+        if a.extlower:
+            extension = extension.lower()
+        if a.suffix and not a.suffix in extension:
+            continue
         if a.start:
             newname = start_name(newname, a.start, a.replace)
         if a.skip:
@@ -251,6 +254,7 @@ def bulk_rename(a):
 
         newname = newname + extension
         do_rename(filename, newname, a.force, a.yes, a.verbose)
+
 
 def do_rename(filename, newname, force, yes, verbose):
 
@@ -354,13 +358,5 @@ if __name__ == '__main__':
         nocolor()
 
     os.chdir(args.root)
-    # Where to start, what to get
-    if args.recursive:
-        for top, subdirs, files in os.walk(a.root):
-            for d in subdirs:
-                newdir = os.path.join(top, d)
-                os.chdir(newdir)
-                bulk_rename(a)
-    else:
-        bulk_rename(args)
+    bulk_rename(args)
 
