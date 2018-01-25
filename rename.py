@@ -39,7 +39,7 @@ def nocolor():
     BOLD  = ''
     REV   = ''
 
-def skip_name(filename, skip='0'):
+def skip_name(filename, skip=''):
     '''-k skip: strip chars at beginning of filename'''
     try: elen = int(skip)
     except: elen = len(skip)
@@ -180,11 +180,6 @@ def hash_name(filename, hash='sha256'):
 
 def bulk_rename(a):
     '''The loop on current dir to rename files based on requests'''
-    # initialize counter
-    try:
-        counter = int(a.number)
-    except:
-        counter = 1
 
     if a.files:
         filelist = a.files
@@ -210,6 +205,11 @@ def bulk_rename(a):
             extension = extension.lower()
         if a.suffix and not a.suffix in extension:
             continue
+
+        if a.delete:
+            delete_filename(filename, a.force, a.yes, a.verbose)
+            continue
+
         if a.start:
             newname = start_name(newname, a.start, a.replace)
         if a.skip:
@@ -233,8 +233,8 @@ def bulk_rename(a):
         if a.timestamp:
             newname = timestamp_name(filename, newname, a.bottom)
         if a.number:
-            newname = add_number(newname, counter, a.bottom)
-            counter += 1
+            newname = add_number(newname, a.number, a.bottom)
+            a.number += 1
         if a.strip:
             newname = strip_name(newname)
         if a.ztrip:
@@ -255,6 +255,27 @@ def bulk_rename(a):
         newname = newname + extension
         do_rename(filename, newname, a.force, a.yes, a.verbose)
 
+
+def delete_filename(filename, force, yes, verbose):
+    if verbose:
+        print('File to be deleted\t=>', CYAN, filename, RESET)
+
+    if not yes:
+       answer = input(f'Delete {filename} " ? [y/n] ')
+       yes = answer.lower() == 'y'
+       if not yes: return
+
+    print('THIS FILE         \t=>', GREEN, filename, RESET)
+    if yes and force:
+        try:
+            # Preserve creation and access time is default
+            os.unlink(filename)
+            print('WAS DELETED \t=>', GREEN, filename, RESET)
+
+        except:
+            print('Cannot delete ', RED, filename, RESET)
+    else:
+        print('WILL BE DELETED \t=>', CYAN, filename, RESET)
 
 def do_rename(filename, newname, force, yes, verbose):
 
@@ -315,7 +336,7 @@ if __name__ == '__main__':
     parser.add_argument('-z', '--ztrip', help='delete n chars from end of filename')
     parser.add_argument('-k', '--skip', help='skip n char from start of filename')
     parser.add_argument('-e', '--extension', help='change extension example to .mp3')
-    parser.add_argument('-n', '--number', help='Add a 2 digit sequence start of filename', nargs='?', const='1')
+    parser.add_argument('-n', '--number', type=int, help='Add a 2 digit sequence', nargs='?', const='1')
     parser.add_argument('-w', '--swap', help='swap names Alfa Beta->Beta Alfa', nargs='?', const=' ')
     # Applicability
     parser.add_argument('--root', help='this will be the root directory', default='./')
@@ -342,6 +363,8 @@ if __name__ == '__main__':
     parser.add_argument('-Z', '--sanitize', action='store_true', help='Sanitize name from weird chars')
     parser.add_argument('-H', '--hash', help='filename is hash', nargs='?', const='sha256')
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
+    # Other Flags
+    parser.add_argument('--delete', action='store_true', help='delete file if match')
 
     # get args
     args = parser.parse_args()
