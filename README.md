@@ -16,7 +16,9 @@ Software: works with python 3 (but I guess with 2.7 is ok)
 
     optional arguments:
       -h, --help            show this help message and exit
-      -a [SPACE], --space [SPACE]
+      -a TEXT, --add TEXT
+                            add text to filename
+      -b [SPACE], --blank [SPACE]
                             Replace space with _
       -c CONTAINS, --contains CONTAINS
                             check for string in filename; works with -r
