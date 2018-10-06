@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # File: rename.py
 # Author: ernitron (c) 2017
@@ -8,7 +8,7 @@ import os
 import sys
 import re
 
-Version = "1.2.9"
+Version = "1.3.1"
 
 # To print colored text on term
 RED   = ''
@@ -65,8 +65,8 @@ def remove_underscore(filename):
     filename = filename.replace('_', ' ')
     return filename.replace('-', ' ')
 
-def replace_space(filename, fill_char='_'):
-    '''Replace spaces with fill_char (default to '_') '''
+def replace_blank(filename, fill_char='_'):
+    '''Replace blank or spaces with fill_char (default to '_') '''
     return filename.replace(' ', fill_char)
 
 def strip_name(filename):
@@ -106,7 +106,13 @@ def replace_content(filename, contains, replace):
     '''Replace content with replace string :returns newname '''
     if contains and contains in filename:
         return filename.replace(contains, replace)
-    else: return filename
+    return filename
+
+def delete_string(filename, contains):
+    '''Delete content in string: returns newname'''
+    if contains in filename:
+        return filename.replace(contains, '')
+    return filename
 
 def lower_case(filename):
     '''Lower filename: from NEWNAME returns newname'''
@@ -126,6 +132,13 @@ def add_number(filename, counter, bottom):
         return '%s-%02d' % (filename, counter)
     else:
         return '%02d-%s' % (counter, filename)
+
+def add_string(filename, string, start=True):
+    '''Add a string :returns newname '''
+    if start:
+        return '%s-%s' % (string, filename)
+    else:
+        return '%s-%s' % (filename, string)
 
 def substitute(filename, pattern, replace):
     if not pattern: return filename
@@ -206,14 +219,16 @@ def bulk_rename(a):
         if a.suffix and not a.suffix in extension:
             continue
 
-        if a.delete:
-            delete_filename(filename, a.force, a.yes, a.verbose)
+        if a.remove:
+            remove_filename(filename, a.force, a.yes, a.verbose)
             continue
 
         if a.start:
             newname = start_name(newname, a.start, a.replace)
         if a.skip:
             newname = skip_name(newname, a.skip)
+        if a.delete:
+            newname = delete_string(newname, a.delete)
         if a.contains:
             newname = replace_content(newname, a.contains, a.replace)
         if a.pattern:
@@ -226,8 +241,8 @@ def bulk_rename(a):
             newname = lower_case(newname)
         if a.title:
             newname = title_case(newname)
-        if a.space:
-            newname = replace_space(newname, fill_char=a.space)
+        if a.blank:
+            newname = replace_blank(newname, fill_char=a.blank)
         if a.sanitize:
             newname = sanitize_name(newname)
         if a.timestamp:
@@ -235,6 +250,8 @@ def bulk_rename(a):
         if a.number:
             newname = add_number(newname, a.number, a.bottom)
             a.number += 1
+        if a.string:
+            newname = add_string(newname, a.string, a.start)
         if a.strip:
             newname = strip_name(newname)
         if a.ztrip:
@@ -256,26 +273,27 @@ def bulk_rename(a):
         do_rename(filename, newname, a.force, a.yes, a.verbose)
 
 
-def delete_filename(filename, force, yes, verbose):
+def remove_filename(filename, force, yes, verbose):
     if verbose:
-        print('File to be deleted\t=>', CYAN, filename, RESET)
+        print('File to be removed\t=>', CYAN, filename, RESET)
 
     if not yes:
-       answer = input(f'Delete {filename} " ? [y/n] ')
+       answer = input(f'remove {filename} " ? [y/n] ')
        yes = answer.lower() == 'y'
        if not yes: return
 
-    print('THIS FILE         \t=>', GREEN, filename, RESET)
+    cwd = os.getcwd()
+    print('THIS FILE         \t=>', GREEN, cwd, filename, RESET)
     if yes and force:
         try:
             # Preserve creation and access time is default
             os.unlink(filename)
-            print('WAS DELETED \t=>', GREEN, filename, RESET)
+            print('WAS REMOVED \t=>', GREEN, filename, RESET)
 
         except:
-            print('Cannot delete ', RED, filename, RESET)
+            print('Cannot remove ', RED, filename, RESET)
     else:
-        print('WILL BE DELETED \t=>', CYAN, filename, RESET)
+        print('WILL BE REMOVED \t=>', CYAN, filename, RESET)
 
 def do_rename(filename, newname, force, yes, verbose):
 
@@ -328,8 +346,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='rename files', epilog=example_text,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument('-a', '--space', help='Replace space with _', nargs='?', const='_')
+    parser.add_argument('-a', '--string', help='add string')
+    parser.add_argument('-b', '--blank', help='Replace blank with _', nargs='?', const='_')
     parser.add_argument('-c', '--contains', help='check for string in filename; works with -r')
+    parser.add_argument('-d', '--delete', help='delete string in filename')
     parser.add_argument('-p', '--pattern', help='pattern with regex')
     parser.add_argument('-r', '--replace', help='replace string; works with -c and -p', default='')
     parser.add_argument('-s', '--start', help='delete string from beginning of filename')
@@ -364,7 +384,7 @@ if __name__ == '__main__':
     parser.add_argument('-H', '--hash', help='filename is hash', nargs='?', const='sha256')
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
     # Other Flags
-    parser.add_argument('--delete', action='store_true', help='delete file if match')
+    parser.add_argument('--remove', action='store_true', help='remove file if match')
 
     # get args
     args = parser.parse_args()
