@@ -70,7 +70,8 @@ def replace_blank(filename, fill_char='_'):
     return filename.replace(' ', fill_char)
 
 def strip_name(filename):
-    return filename.strip(' -._\t\n\r')
+    f = filename.replace('  ', ' ')
+    return f.strip(' -._\t\n\r')
 
 def space_case(filename):
     '''Convert to Title Case inserting spaces where underscore'''
@@ -88,7 +89,8 @@ def space_case(filename):
 
 def camel_case(filename):
     '''Convert to CamelCase: from camel_case returns Camel Case'''
-    tmpname = filename.replace('_', ' ')
+    #tmpname = filename.replace('_', ' ')
+    tmpname = filename
 
     prec = ''
     newword = ''
@@ -100,7 +102,9 @@ def camel_case(filename):
     tmpname = newword
 
     modified_name = re.findall('[\w]+', tmpname.lower())
-    return ''.join([word.title() + ' ' for word in modified_name])
+    newname = ' '.join([word.title() for word in modified_name])
+    tmpname = newname.replace("L ", "L'")
+    return tmpname
 
 def replace_content(filename, contains, replace):
     '''Replace content with replace string :returns newname '''
@@ -134,7 +138,7 @@ def add_number(filename, counter, bottom):
         return '%02d-%s' % (counter, filename)
 
 def add_string(filename, string, start=True):
-    '''Add a string :returns newname '''
+    '''Add a string :returns string-newname '''
     if start:
         return '%s-%s' % (string, filename)
     else:
@@ -145,7 +149,7 @@ def substitute(filename, pattern, replace):
     if pattern[-1] == 'i':
         flags = re.IGNORECASE
     else:
-        flags = 0
+        flags = None
     try:
         spb = pattern.split('/')
         return re.sub(spb[1], spb[2], filename, flags=flags)
@@ -175,7 +179,7 @@ def swap_name(filename, swap):
     return newname
 
 def sanitize_name(filename):
-    sanitize = """[]()%@"!#$^&*,:;></?{}'"""
+    sanitize = """[]()%@"!$^&*,:;></?{}"""
     for char in sanitize:
         filename = filename.replace(char, '')
     return strip_name(filename)
@@ -362,12 +366,12 @@ if __name__ == '__main__':
     parser.add_argument('--root', help='this will be the root directory', default='./')
     parser.add_argument('-m', '--match', help='apply only to file that match pattern')
     parser.add_argument('-x', '--suffix', help='apply only to file with suffix like .mp3')
-    parser.add_argument('-f', '--files', help='apply to list of files', nargs='*')
     parser.add_argument('-D', '--directory', action='store_true', help='Apply only to directory')
     parser.add_argument('-G', '--regular', action='store_true', help='Apply only to regular files')
     parser.add_argument('-R', '--recursive', action='store_true', help='Recursive into subdirs')
     parser.add_argument('-Y', '--yes', action='store_false', help='Confirm before rename [y/n]')
     parser.add_argument('-F', '--force', action='store_true', help='Force to rename (do it!)', default=False)
+    #parser.add_argument('-f', '--files', help='apply to list of files', nargs='*')
     # Other Boolean Flags
     parser.add_argument('-_', '--under', action='store_true', help='Remove underscores and minuses', default=False)
     parser.add_argument('-B', '--bottom', action='store_true', help='Put number sequence at end')
@@ -385,6 +389,8 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
     # Other Flags
     parser.add_argument('--remove', action='store_true', help='remove file if match')
+    # Files
+    parser.add_argument('files', nargs='*')
 
     # get args
     args = parser.parse_args()
