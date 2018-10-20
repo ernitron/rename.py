@@ -8,7 +8,7 @@ import os
 import sys
 import re
 
-Version = "1.3.1"
+Version = "1.4.2"
 
 # To print colored text on term
 RED   = ''
@@ -235,8 +235,8 @@ def bulk_rename(a):
             newname = delete_string(newname, a.delete)
         if a.contains:
             newname = replace_content(newname, a.contains, a.replace)
-        if a.pattern:
-            newname = substitute(newname, a.pattern, a.replace)
+        if a.expression:
+            newname = substitute(newname, a.expression, a.replace)
         if a.camel:
             newname = camel_case(newname)
         if a.upper:
@@ -354,14 +354,15 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--blank', help='Replace blank with _', nargs='?', const='_')
     parser.add_argument('-c', '--contains', help='check for string in filename; works with -r')
     parser.add_argument('-d', '--delete', help='delete string in filename')
-    parser.add_argument('-p', '--pattern', help='pattern with regex')
+    parser.add_argument('-e', '--expression', help='pattern with regex')
     parser.add_argument('-r', '--replace', help='replace string; works with -c and -p', default='')
     parser.add_argument('-s', '--start', help='delete string from beginning of filename')
     parser.add_argument('-z', '--ztrip', help='delete n chars from end of filename')
     parser.add_argument('-k', '--skip', help='skip n char from start of filename')
-    parser.add_argument('-e', '--extension', help='change extension example to .mp3')
     parser.add_argument('-n', '--number', type=int, help='Add a 2 digit sequence', nargs='?', const='1')
     parser.add_argument('-w', '--swap', help='swap names Alfa Beta->Beta Alfa', nargs='?', const=' ')
+    parser.add_argument('-ext', '--extension', help='change extension example to .mp3')
+    parser.add_argument('-exl', '--extlower', action='store_true', help='Transform extension into lower case')
     # Applicability
     parser.add_argument('--root', help='this will be the root directory', default='./')
     parser.add_argument('-m', '--match', help='apply only to file that match pattern')
@@ -377,7 +378,6 @@ if __name__ == '__main__':
     parser.add_argument('-B', '--bottom', action='store_true', help='Put number sequence at end')
     parser.add_argument('-C', '--camel', action='store_true', help='Transform filename in CamelCase')
     parser.add_argument('-L', '--lower', action='store_true', help='Transform filename into lower case')
-    parser.add_argument('-E', '--extlower', action='store_true', help='Transform extension into lower case')
     parser.add_argument('-U', '--upper', action='store_true', help='Transform filename into upper case')
     parser.add_argument('-T', '--title', action='store_true', help='Transform into Title case ')
     parser.add_argument('-V', '--version', action='store_true', help='Print version and die')

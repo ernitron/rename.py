@@ -14,9 +14,10 @@ NORMAL = $<\e[0m
 # Variables
 INSTALLDIR=/usr/local/bin/
 APPLICATION= rename.py \
+			 yaren.py
 
 check:
-	python3.6 -m py_compile *.py
+	python3 -m py_compile *.py
 	rm -rf *.pyc __pycache__
 
 run: check
