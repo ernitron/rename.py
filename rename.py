@@ -338,12 +338,11 @@ if __name__ == '__main__':
 
     example_text = '''
     Examples:
-    # rename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
+    $ rename.py --skip start_of_file --skip 5 --contains This --replace That --number --suffix .mp3 --force
     would rename a file like: start_of_file1234_Take_This.mp3
                  into: 01-Take_That.mp3
 
-    # rename.py -s start_of_file -k 5 -p '/This/That/' -n -x mp3 -F
-    # rename.py -k start_of_file1234_ -p This -r That -n -x mp3 -F
+    $ rename.py -s start_of_file -k 5 -e '/This/That/' -n -x mp3 -F
     would do the same
  '''
 
